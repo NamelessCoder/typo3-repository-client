@@ -1,0 +1,22 @@
+{
+    "name": "namelesscoder/typo3-repository-client",
+    "description": "Client for interacting with the official TYPO3 Extension Repository (TER). Contains API and CLI scripts.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Claus Due",
+            "email": "claus@namelesscoder.net"
+        }
+    ],
+	"autoload": {
+		"psr-4": {
+			"NamelessCoder\\TYPO3RepositoryClient\\Tests\\Fixtures\\": "tests/fixtures/NamelessCoder/TYPO3RepositoryClient/",
+			"NamelessCoder\\TYPO3RepositoryClient\\Tests\\Unit\\": "tests/unit/NamelessCoder/TYPO3RepositoryClient/",
+			"NamelessCoder\\TYPO3RepositoryClient\\": "src/NamelessCoder/TYPO3RepositoryClient/"
+		}
+	},
+    "minimum-stability": "dev",
+	"require-dev": {
+		"phpunit/phpunit": "4.2.*"
+	}
+}
