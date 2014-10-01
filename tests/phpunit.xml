@@ -1,0 +1,27 @@
+<phpunit bootstrap="./bootstrap.php"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertWarningsToExceptions="true"
+         forceCoversAnnotation="false"
+         processIsolation="false"
+         stopOnError="false"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         strict="false"
+         verbose="false">
+    <testsuites>
+        <testsuite name="typo3-repository-client">
+            <directory>.</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <addUncoveredFilesFromWhitelist>true</addUncoveredFilesFromWhitelist>
+            <processUncoveredFilesFromWhitelist>true</processUncoveredFilesFromWhitelist>
+            <directory>../src/NamelessCoder/TYPO3RepositoryClient/</directory>
+        </whitelist>
+    </filter>
+</phpunit>
