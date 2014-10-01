@@ -38,15 +38,6 @@ class ExtensionUploadPacker {
 		return $EM_CONF[$_EXTKEY];
 	}
 
-	protected function packUploadData(array $uploadData) {
-		$serialized = serialize($uploadData);
-		$md5 = md5($serialized);
-		$content = $md5 . ':';
-		$content .= 'gzcompress:';
-		$content .= gzcompress($serialized);
-		return $content;
-	}
-
 	/**
 	 * @param string $extensionData
 	 * @param string $key
