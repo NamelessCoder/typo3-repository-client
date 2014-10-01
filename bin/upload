@@ -1,13 +1,34 @@
 #!/usr/bin/env php
 <?php
 
-require '../autoload.php';
+require realpath(__DIR__ . '/../vendor/autoload.php');
 
-if (4 !== count($argc)) {
-	die('Upload command requires a total of three arguments in the following order: username password directory');
+if (3 > count($argv)) {
+	die('Upload command requires a total of at least three arguments in the following order: username password directory (comment)' . PHP_EOL);
 }
 
-list (, $username, $password, $directory) = $argc;
+list (, $username, $password, $directory) = $argv;
+$comment = TRUE === isset($argv[4]) ? $argv[4] : NULL;
 
 $uploader = new \NamelessCoder\TYPO3RepositoryClient\Uploader();
-$uploader->upload($directory, $username, $password);
+try {
+	$result = $uploader->upload($directory, $username, $password, $comment);
+} catch (\SoapFault $error) {
+	echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+} catch (\RuntimeException $error) {
+	echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+}
+
+if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION])) {
+	echo 'Succesfully uploaded new version: ' . $result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION] . PHP_EOL;
+}
+
+if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES])) {
+	foreach ($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES] as $index => $message) {
+		echo 'Message #' . ($index + 1) . ': ' . $message . PHP_EOL;
+	}
+}
+
+exit(0);

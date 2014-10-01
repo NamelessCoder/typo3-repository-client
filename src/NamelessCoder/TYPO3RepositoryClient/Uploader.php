@@ -10,13 +10,14 @@ class Uploader {
 	 * @param string $directory
 	 * @param string $username
 	 * @param string $password
+	 * @param string $comment
 	 * @return array
 	 */
-	public function upload($directory, $username, $password) {
+	public function upload($directory, $username, $password, $comment = NULL) {
 		$connection = new Connection();
 		$packer = new ExtensionUploadPacker();
-		$data = $packer->createSoapData();
-		$output = $this->call(Connection::FUNCTION_UPLOAD, $data, $username, $password);
+		$data = $packer->pack($directory, $username, $password, $comment);
+		$output = $connection->call(Connection::FUNCTION_UPLOAD, $data, $username, $password);
 		return $output;
 	}
 

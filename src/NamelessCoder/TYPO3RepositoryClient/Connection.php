@@ -7,8 +7,11 @@ namespace NamelessCoder\TYPO3RepositoryClient;
 class Connection {
 
 	const SOAP_RETURN_CODE = 'resultCode';
+	const SOAP_RETURN_MESSAGES = 'resultMessages';
+	const SOAP_RETURN_VERSION = 'version';
 	const SOAP_CODE_SUCCESS = 10504;
 	const WSDL_URL = 'http://typo3.org/wsdl/tx_ter_wsdl.php';
+	const WSDL_NAMESPACE = 'http://www.typo3.org/wsdl/tx_ter/';
 	const FUNCTION_UPLOAD = 'uploadExtension';
 
 	/**
@@ -34,11 +37,10 @@ class Connection {
 	public function call($function, array $parameters, $username, $password) {
 		$client = $this->getSoapClientForWsdl($this->wsdl);
 		$header = $this->getAuthenticationHeader($username, $password);
-		$result = $client->__soapCall($function, $parameters, NULL, $header);
-		if (TRUE === $result instanceof \SoapFault) {
-			throw $result;
+		$output = $client->__soapCall($function, $parameters, array('exceptions' => TRUE, 'trace' => TRUE));
+		if (TRUE === $output instanceof \SoapFault) {
+			throw $output;
 		}
-		$output = $this->convert($output);
 		if (FALSE === isset($output[self::SOAP_RETURN_CODE])) {
 			throw new \RuntimeException('TER command "' . $function . '" failed without a return code');
 		}
@@ -54,7 +56,7 @@ class Connection {
 	 * @return \SoapHeader
 	 */
 	protected function getAuthenticationHeader($username, $password) {
-		return new \SoapHeader('', 'HeaderLogin', (object) array('username' => $username, 'password' => $password), TRUE);
+		return new \SoapHeader(self::WSDL_NAMESPACE, 'HeaderLogin', (object) array('username' => $username, 'password' => $password), TRUE);
 	}
 
 	/**
