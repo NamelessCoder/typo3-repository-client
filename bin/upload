@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+require '../autoload.php';
+
+if (4 !== count($argc)) {
+	die('Upload command requires a total of three arguments in the following order: username password directory');
+}
+
+list (, $username, $password, $directory) = $argc;
+
+$uploader = new \NamelessCoder\TYPO3RepositoryClient\Uploader();
+$uploader->upload($directory, $username, $password);
