@@ -67,21 +67,4 @@ class Connection {
 		return new \SoapClient($wsdl);
 	}
 
-	/**
-	 * Convert object to array
-	 *
-	 * @param	object	$object
-	 * @return	array
-	 */
-	function convert($object) {
-		$array = (array) $object;
-		foreach ($array as $key => $value) {
-			if (TRUE === is_object($object) || TRUE === is_array($object)) {
-				$value = $this->convert($value);
-			}
-			$array[$key] = $value;
-		}
-		return $array;
-	}
-
 }
