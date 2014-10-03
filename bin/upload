@@ -11,6 +11,7 @@ list (, $username, $password, $directory) = $argv;
 $comment = TRUE === isset($argv[4]) ? $argv[4] : NULL;
 
 $uploader = new \NamelessCoder\TYPO3RepositoryClient\Uploader();
+$directory = realpath($directory);
 try {
 	$result = $uploader->upload($directory, $username, $password, $comment);
 } catch (\SoapFault $error) {

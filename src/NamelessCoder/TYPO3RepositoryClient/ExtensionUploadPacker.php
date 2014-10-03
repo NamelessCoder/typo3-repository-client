@@ -14,7 +14,6 @@ class ExtensionUploadPacker {
 	 * @return string
 	 */
 	public function pack($directory, $username, $password, $comment) {
-		$directory = realpath($directory);
 		$extensionKey = pathinfo($directory, PATHINFO_FILENAME);
 		$data = $this->createFileDataArray($directory);
 		$data['EM_CONF'] = $this->readExtensionConfigurationFile($directory, $extensionKey);
@@ -152,14 +151,14 @@ class ExtensionUploadPacker {
 
 		// Initialize output array:
 		$uploadArray = array();
-		$uploadArray['extKey'] = rtrim(realpath($directory), '/') . '/';
+		$uploadArray['extKey'] = rtrim(pathinfo($directory, PATHINFO_FILENAME), '/');
 		$uploadArray['misc']['codelines'] = 0;
 		$uploadArray['misc']['codebytes'] = 0;
 
 		$uploadArray['techInfo'] = 'All good, baby';
 
 		$uploadArray['FILES'] = array();
-		$directoryLength = strlen($directory) + 1;
+		$directoryLength = strlen($directory);
 		$options = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::NEW_CURRENT_AND_KEY | \FilesystemIterator::FOLLOW_SYMLINKS;
 		$iterator = new \RecursiveDirectoryIterator($directory, $options);
 		$iterator = new \RecursiveIteratorIterator($iterator);
@@ -174,8 +173,8 @@ class ExtensionUploadPacker {
 				'is_executable' => is_executable($file),
 				'content' => file_get_contents($file)
 			);
-			if (TRUE === in_array($extension, array('php,inc'))) {
-				$uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(LF, $uploadArray['FILES'][$relativeFilename]['content']));
+			if (TRUE === in_array($extension, array('php', 'inc'))) {
+				$uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(PHP_EOL, $uploadArray['FILES'][$relativeFilename]['content']));
 				$uploadArray['misc']['codelines'] += $uploadArray['FILES'][$relativeFilename]['codelines'];
 				$uploadArray['misc']['codebytes'] += $uploadArray['FILES'][$relativeFilename]['size'];
 			}
