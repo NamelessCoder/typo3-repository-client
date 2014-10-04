@@ -14,11 +14,26 @@ class Uploader {
 	 * @return array
 	 */
 	public function upload($directory, $username, $password, $comment = NULL) {
-		$connection = new Connection();
-		$packer = new ExtensionUploadPacker();
-		$data = $packer->pack($directory, $username, $password, $comment);
-		$output = $connection->call(Connection::FUNCTION_UPLOAD, $data, $username, $password);
-		return $output;
+		return $this->getConnection()->call(
+			Connection::FUNCTION_UPLOAD,
+			$this->getExtensionUploadPacker()->pack($directory, $username, $password, $comment),
+			$username,
+			$password
+		);
+	}
+
+	/**
+	 * @return Connection
+	 */
+	protected function getConnection() {
+		return new Connection();
+	}
+
+	/**
+	 * @return ExtensionUploadPacker
+	 */
+	protected function getExtensionUploadPacker() {
+		return new ExtensionUploadPacker();
 	}
 
 }
