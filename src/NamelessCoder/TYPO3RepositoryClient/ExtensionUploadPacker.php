@@ -6,6 +6,9 @@ namespace NamelessCoder\TYPO3RepositoryClient;
  */
 class ExtensionUploadPacker {
 
+	const KIND_DEPENDENCY = 'depends';
+	const KIND_CONFLICT = 'conflicts';
+
 	/**
 	 * @param string $directory
 	 * @param string $username
@@ -56,7 +59,7 @@ class ExtensionUploadPacker {
 				throw new \RuntimeException('Invalid dependency definition! Dependencies must be an array indexed by extension key');
 			}
 			$dependenciesArr[] = array(
-				'kind' => 'depends',
+				'kind' => $key,
 				'extensionKey' => $extKey,
 				'versionRange' => $version,
 			);
@@ -85,8 +88,8 @@ class ExtensionUploadPacker {
 	public function createSoapData($extensionKey, $extensionData, $username, $password, $comment) {
 
 		// Create dependency / conflict information:
-		$dependenciesArr = $this->createDependenciesArray($extensionData, 'depends');
-		$dependenciesArr = array_merge($dependenciesArr, $this->createDependenciesArray($extensionData, 'conflicts'));
+		$dependenciesArr = $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_DEPENDENCY);
+		$dependenciesArr = array_merge($dependenciesArr, $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_CONFLICT));
 
 		// Compile data for SOAP call:
 		$account = array(

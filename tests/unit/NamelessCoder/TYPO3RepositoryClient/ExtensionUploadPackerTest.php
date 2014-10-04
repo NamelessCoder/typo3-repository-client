@@ -2,6 +2,7 @@
 namespace NamelessCoder\TYPO3RepositoryClient\Tests\Unit;
 
 use NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker;
+use NamelessCoder\TYPO3RepositoryClient\Uploader;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
@@ -46,6 +47,72 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		vfsStreamWrapper::register();
 		vfsStreamWrapper::setRoot(new vfsStreamDirectory('temp', 0777));
 		vfsStreamWrapper::getRoot()->addChild($emConf);
+	}
+
+	public function testCreateSoapDataCreatesExpectedOutput() {
+		$directory = vfsStream::url('temp');
+		$packer = new ExtensionUploadPacker();
+		$result = $packer->pack($directory, 'username', 'password', 'comment');
+		$expected = array (
+			'accountData' => array('username' => 'username', 'password' => 'password'),
+			'extensionData' => array (
+				'extensionKey' => 'temp',
+				'version' => '1.2.3',
+				'metaData' => array (
+					'title' => 'Dummy title',
+					'description' => 'Dummy description',
+					'category' => 'misc',
+					'state' => 'beta',
+					'authorName' => 'Author Name',
+					'authorEmail' => 'author@domain.com',
+					'authorCompany' => '',
+				),
+				'technicalData' => array (
+					'dependencies' => array (
+						array (
+							'kind' => 'depends',
+							'extensionKey' => 'typo3',
+							'versionRange' => '6.1.0-6.2.99',
+						),
+						array (
+							'kind' => 'depends',
+							'extensionKey' => 'cms',
+							'versionRange' => '',
+						)
+					),
+					'loadOrder' => '',
+					'uploadFolder' => FALSE,
+					'createDirs' => '',
+					'shy' => 0,
+					'modules' => '',
+					'modifyTables' => '',
+					'priority' => '',
+					'clearCacheOnLoad' => FALSE,
+					'lockType' => '',
+					'doNotLoadInFEe' => NULL,
+					'docPath' => NULL,
+				),
+				'infoData' => array (
+					'codeLines' => 40,
+					'codeBytes' => 825,
+					'codingGuidelinesCompliance' => '',
+					'codingGuidelinesComplianceNotes' => '',
+					'uploadComment' => 'comment',
+					'techInfo' => 'All good, baby',
+				),
+			),
+			'filesData' => array (
+				array (
+					'name' => '/ext_emconf.php',
+					'size' => 825,
+					'modificationTime' => self::$mtime,
+					'isExecutable' => 0,
+					'content' => self::$fixtureString,
+					'contentMD5' => '96ac5dcefad9a409f516bf046dbcb9ef',
+				),
+			),
+		);
+		$this->assertEquals($expected, $result);
 	}
 
 	public function testReadExtensionConfigurationFileThrowsExceptionIfFileDoesNotExist() {
@@ -112,6 +179,78 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		return array(
 			array(array('foo' => 'bar'), 'foo', 'baz', 'bar'),
 			array(array('foo' => 'bar'), 'foo2', 'baz', 'baz'),
+		);
+	}
+
+	/**
+	 * @dataProvider getExtensionDataAndExpectedDependencyOutput
+	 * $param string $kindOfDependency
+	 * @param array $extensionData
+	 * @param array $expectedOutout
+	 * @param string $expectedException
+	 */
+	public function testCreateDependenciesArray($kindOfDependency, $extensionData, $expectedOutout, $expectedException) {
+		$uploader = new ExtensionUploadPacker();
+		$method = new \ReflectionMethod($uploader, 'createDependenciesArray');
+		$method->setAccessible(TRUE);
+		if (NULL !== $expectedException) {
+			$this->setExpectedException($expectedException);
+		}
+		$output = $method->invoke($uploader, $extensionData, $kindOfDependency);
+		$this->assertEquals($expectedOutout, $output);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getExtensionDataAndExpectedDependencyOutput() {
+		return array(
+			// correct usage and input:
+			array(
+				ExtensionUploadPacker::KIND_DEPENDENCY,
+				array(
+					'EM_CONF' => array(
+						'constraints' => array(
+							ExtensionUploadPacker::KIND_DEPENDENCY => array(
+								'foobar' => '0.0.0-1.0.0',
+								'foobar2' => '1.0.0-2.0.0',
+							)
+						)
+					)
+				),
+				array(
+					array('kind' => 'depends', 'extensionKey' => 'foobar', 'versionRange' => '0.0.0-1.0.0'),
+					array('kind' => 'depends', 'extensionKey' => 'foobar2', 'versionRange' => '1.0.0-2.0.0'),
+				),
+				NULL
+			),
+			// no deps: empty output, no error
+			array(
+				ExtensionUploadPacker::KIND_DEPENDENCY,
+				array('EM_CONF' => array()),
+				array(),
+				NULL
+			),
+			// deps setting not an array, empty output, no error
+			array(
+				ExtensionUploadPacker::KIND_DEPENDENCY,
+				array('EM_CONF' => array('constraints' => array(ExtensionUploadPacker::KIND_DEPENDENCY => 'iamastring'))),
+				array(),
+				NULL
+			),
+			// deps numerically indexed - error!
+			array(
+				ExtensionUploadPacker::KIND_DEPENDENCY,
+				array(
+					'EM_CONF' => array(
+						'constraints' => array(
+							ExtensionUploadPacker::KIND_DEPENDENCY => array(0 => array('0.0.0-1.0.0'))
+						)
+					)
+				),
+				array(),
+				'RuntimeException'
+			),
 		);
 	}
 
