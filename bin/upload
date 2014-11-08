@@ -7,7 +7,7 @@ if (3 > count($argv)) {
 	die('Upload command requires a total of at least three arguments in the following order: username password directory (comment)' . PHP_EOL);
 }
 
-list (, $username, $password, $directory) = $argv;
+list (, $directory, $username, $password) = $argv;
 $comment = TRUE === isset($argv[4]) ? $argv[4] : NULL;
 
 $uploader = new \NamelessCoder\TYPO3RepositoryClient\Uploader();
