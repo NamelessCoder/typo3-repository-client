@@ -8,6 +8,7 @@ class ExtensionUploadPacker {
 
 	const KIND_DEPENDENCY = 'depends';
 	const KIND_CONFLICT = 'conflicts';
+	protected $permittedDotFiles = array('.htaccess', '.htpasswd');
 
 	/**
 	 * @param string $directory
@@ -92,10 +93,6 @@ class ExtensionUploadPacker {
 		$dependenciesArr = array_merge($dependenciesArr, $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_CONFLICT));
 
 		// Compile data for SOAP call:
-		$account = array(
-			'username' => $username,
-			'password' => $password
-		);
 		$extension = array(
 			'extensionKey' => $extensionKey,
 			'version' => $this->valueOrDefault($extensionData, 'version'),
@@ -143,13 +140,17 @@ class ExtensionUploadPacker {
 				'contentMD5' => $infoArr['content_md5'],
 			);
 		}
-		return array(
-			'accountData' => $account,
+		$compier = new SoapDataCompiler();
+		return $compier->createSoapData($username, $password, array(
 			'extensionData' => $extension,
 			'filesData' => $files
-		);
+		));
 	}
 
+	/**
+	 * @param string $directory
+	 * @return array
+	 */
 	protected function createFileDataArray($directory) {
 
 		// Initialize output array:
@@ -162,29 +163,58 @@ class ExtensionUploadPacker {
 
 		$uploadArray['FILES'] = array();
 		$directoryLength = strlen($directory);
-		$options = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::NEW_CURRENT_AND_KEY | \FilesystemIterator::FOLLOW_SYMLINKS;
-		$iterator = new \RecursiveDirectoryIterator($directory, $options);
-		$iterator = new \RecursiveIteratorIterator($iterator);
+		$directoryIterator = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
+		$iterator = new \RecursiveIteratorIterator($directoryIterator);
 		foreach ($iterator as $file) {
-			$filename = $file->getPathName();
-			$relativeFilename = substr($filename, $directoryLength);
-			$extension = pathinfo($filename, PATHINFO_EXTENSION);
-			$uploadArray['FILES'][$relativeFilename] = array(
-				'name' => $relativeFilename,
-				'size' => filesize($file),
-				'mtime' => filemtime($file),
-				'is_executable' => is_executable($file),
-				'content' => file_get_contents($file)
-			);
-			if (TRUE === in_array($extension, array('php', 'inc'))) {
-				$uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(PHP_EOL, $uploadArray['FILES'][$relativeFilename]['content']));
-				$uploadArray['misc']['codelines'] += $uploadArray['FILES'][$relativeFilename]['codelines'];
-				$uploadArray['misc']['codebytes'] += $uploadArray['FILES'][$relativeFilename]['size'];
+			/** @var \SplFileInfo $file */
+			if (TRUE === $this->isFilePermitted($file, $directory)) {
+				$filename = $file->getPathname();
+				$relativeFilename = substr($filename, $directoryLength);
+				$extension = pathinfo($filename, PATHINFO_EXTENSION);
+				$uploadArray['FILES'][$relativeFilename] = array(
+					'name' => $relativeFilename,
+					'size' => filesize($file),
+					'mtime' => filemtime($file),
+					'is_executable' => is_executable($file),
+					'content' => file_get_contents($file)
+				);
+				if (TRUE === in_array($extension, array('php', 'inc'))) {
+					$uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(PHP_EOL, $uploadArray['FILES'][$relativeFilename]['content']));
+					$uploadArray['misc']['codelines'] += $uploadArray['FILES'][$relativeFilename]['codelines'];
+					$uploadArray['misc']['codebytes'] += $uploadArray['FILES'][$relativeFilename]['size'];
+				}
+				$uploadArray['FILES'][$relativeFilename]['content_md5'] = md5($uploadArray['FILES'][$relativeFilename]['content']);
 			}
-			$uploadArray['FILES'][$relativeFilename]['content_md5'] = md5($uploadArray['FILES'][$relativeFilename]['content']);
 		}
 
 		return $uploadArray;
+	}
+
+	/**
+	 * @param \SplFileInfo $file
+	 * @param string $inPath
+	 * @return boolean
+	 */
+	protected function isFilePermitted(\SplFileInfo $file, $inPath) {
+		$name = $file->getFilename();
+		if (TRUE === $this->isDotFileAndNotPermitted($name)) {
+			return FALSE;
+		}
+		$consideredPathLength = strlen($inPath);
+		foreach (explode('/', trim(substr($file->getPathname(), $consideredPathLength), '/')) as $segment) {
+			if (TRUE === $this->isDotFileAndNotPermitted($segment)) {
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
+
+	/**
+	 * @param string $filename
+	 * @return boolean
+	 */
+	protected function isDotFileAndNotPermitted($filename) {
+		return (FALSE === empty($filename) && '.' === $filename{0} && FALSE === in_array($filename, $this->permittedDotFiles));
 	}
 
 }

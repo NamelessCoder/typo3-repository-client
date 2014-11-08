@@ -254,4 +254,35 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		);
 	}
 
+	/**
+	 * @dataProvider getIsFilePermittedTestValues
+	 * @param \SplFileInfo $file
+	 * @param string $inPath
+	 * @param boolean $expectedPermitted
+	 */
+	public function testIsFilePermitted(\SplFileInfo $file, $inPath, $expectedPermitted) {
+		$instance = new ExtensionUploadPacker();
+		$method = new \ReflectionMethod($instance, 'isFilePermitted');
+		$method->setAccessible(TRUE);
+		$result = $method->invokeArgs($instance, array($file, $inPath));
+		$this->assertEquals($expectedPermitted, $result);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getIsFilePermittedTestValues() {
+		return array(
+			array(new \SplFileInfo('/path/file'), '/path', TRUE),
+			array(new \SplFileInfo('/path/.file'), '/path', FALSE),
+			array(new \SplFileInfo('/path/.htaccess'), '/path', TRUE),
+			array(new \SplFileInfo('/path/.htpasswd'), '/path', TRUE),
+			array(new \SplFileInfo('/.git/file'), '/.git', TRUE),
+			array(new \SplFileInfo('/.git/.dotfile'), '/.git', FALSE),
+			array(new \SplFileInfo('/.git/.htaccess'), '/.git', TRUE),
+			array(new \SplFileInfo('/.git/.htpasswd'), '/.git', TRUE),
+			array(new \SplFileInfo('/path/.git/file'), '/path', FALSE),
+		);
+	}
+
 }
