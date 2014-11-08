@@ -24,3 +24,18 @@ And as CLI command:
 ```bash
 ./bin/upload /path/to/extension myusername mypassword "An optional comment"
 ```
+
+### Version Deleter (admins only)
+
+As component:
+
+```php
+$deleter = new \NamelessCoder\TYPO3RepositoryClient\VersionDeleter();
+$deleter->deleteExtensionVersion('extensionkey', '1.2.3', 'myusername', 'mypassword');
+```
+
+And as CLI command:
+
+```bash
+./bin/rmversion extensionkey 1.2.3 myusername mypassword
+```

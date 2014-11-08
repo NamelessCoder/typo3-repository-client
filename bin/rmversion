@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+require realpath(__DIR__ . '/../vendor/autoload.php');
+
+if (5 !== count($argv)) {
+	die('Delete Version command requires exactly four arguments: extension key, version, username and password' . PHP_EOL);
+}
+
+list (, $extensionKey, $version, $username, $password) = $argv;
+$deleter = new \NamelessCoder\TYPO3RepositoryClient\Deleter();
+
+try {
+	$result = $deleter->deleteExtensionVersion($extensionKey, $version, $username, $password);
+} catch (\SoapFault $error) {
+	echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+} catch (\RuntimeException $error) {
+	echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+}
+
+if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION])) {
+	echo 'Succesfully removed TER extension version: ' . $result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION] . PHP_EOL;
+}
+
+if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES])) {
+	foreach ($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES] as $index => $message) {
+		echo 'Message #' . ($index + 1) . ': ' . $message . PHP_EOL;
+	}
+}
+
+exit(0);

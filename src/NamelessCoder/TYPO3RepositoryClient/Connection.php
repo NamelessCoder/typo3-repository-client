@@ -13,6 +13,7 @@ class Connection {
 	const WSDL_URL = 'http://typo3.org/wsdl/tx_ter_wsdl.php';
 	const WSDL_NAMESPACE = 'http://www.typo3.org/wsdl/tx_ter/';
 	const FUNCTION_UPLOAD = 'uploadExtension';
+	const FUNCTION_DELETEVERSION = 'deleteExtensionVersion';
 
 	/**
 	 * @var string
