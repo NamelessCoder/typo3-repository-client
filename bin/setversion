@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+
+require realpath(__DIR__ . '/../vendor/autoload.php');
+
+if (4 < count($argv)) {
+	die('Set Version requires no more than three parameters: version, stability and optional directory' . PHP_EOL);
+}
+
+if (4 === count($argv)) {
+	list (, $version, $stability, $directory) = $argv;
+} elseif (3 === count($argv)) {
+	list (, $version, $stability) = $argv;
+	$directory = trim(shell_exec('pwd'));
+} elseif (2 === count($argv)) {
+	list (, $version) = $argv;
+	$directory = trim(shell_exec('pwd'));
+	$version = \NamelessCoder\TYPO3RepositoryClient\Versioner::STABILITY_STABLE;
+}
+
+$versioner = new \NamelessCoder\TYPO3RepositoryClient\Versioner();
+
+try {
+	$result = $versioner->write($directory, $version, $stability);
+	echo 'Version updated to ' . $version . '-' . $stability . PHP_EOL;
+} catch (\SoapFault $error) {
+	echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+} catch (\RuntimeException $error) {
+	echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
+	exit(1);
+}
+
+exit(0);
