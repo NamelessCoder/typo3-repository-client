@@ -13,4 +13,4 @@ script:
   - ./vendor/phpunit/phpunit/phpunit -c ./tests/phpunit.xml --coverage-clover ./build/logs/clover.xml
 
 after_script:
-  - ./vendor/bin/coveralls
+  - ./vendor/bin/coveralls -v
