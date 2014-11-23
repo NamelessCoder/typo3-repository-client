@@ -1,4 +1,4 @@
-<phpunit bootstrap="./bootstrap.php"
+<phpunit bootstrap="./tests/bootstrap.php"
          backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
@@ -14,14 +14,14 @@
          verbose="false">
     <testsuites>
         <testsuite name="typo3-repository-client">
-            <directory>.</directory>
+            <directory>tests/unit</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist>
             <addUncoveredFilesFromWhitelist>true</addUncoveredFilesFromWhitelist>
             <processUncoveredFilesFromWhitelist>true</processUncoveredFilesFromWhitelist>
-            <directory>../src/NamelessCoder/TYPO3RepositoryClient/</directory>
+            <directory>src/NamelessCoder/TYPO3RepositoryClient/</directory>
         </whitelist>
     </filter>
 </phpunit>
