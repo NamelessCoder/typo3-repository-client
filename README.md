@@ -1,7 +1,7 @@
 TYPO3 Repository Client API/CLI
 ===============================
 
-[![Build Status](http://jenkins.fluidtypo3.org:8081/buildStatus/icon?job=typo3-repository-client&.png)](http://jenkins.fluidtypo3.org:8081/job/typo3-repository-client/) [![Coverage Status](https://img.shields.io/coveralls/NamelessCoder/typo3-repository-client.svg)](https://coveralls.io/r/NamelessCoder/typo3-repository-client)
+[![Build Status](https://jenkins.fluidtypo3.org:8081/buildStatus/icon?job=typo3-repository-client)](https://jenkins.fluidtypo3.org:8081/job/typo3-repository-client/) [![Coverage Status](https://img.shields.io/coveralls/NamelessCoder/typo3-repository-client.svg)](https://coveralls.io/r/NamelessCoder/typo3-repository-client)
 
 TYPO3 Extension Repository (TER) client library and CLI commands
 
