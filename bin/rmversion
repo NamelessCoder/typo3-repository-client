@@ -1,7 +1,15 @@
 #!/usr/bin/env php
 <?php
 
-require realpath(__DIR__ . '/../vendor/autoload.php');
+$paths = array(
+        realpath(__DIR__ . '/../vendor/autoload.php'),
+        realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+);
+foreach ($paths as $path) {
+        if (FALSE !== $path) {
+                require $path;
+        }
+}
 
 if (5 !== count($argv)) {
 	die('Delete Version command requires exactly four arguments: extension key, version, username and password' . PHP_EOL);

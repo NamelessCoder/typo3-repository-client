@@ -1,7 +1,15 @@
 #!/usr/bin/env php
 <?php
 
-require realpath(__DIR__ . '/../vendor/autoload.php');
+$paths = array(
+        realpath(__DIR__ . '/../vendor/autoload.php'),
+        realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+);
+foreach ($paths as $path) {
+        if (FALSE !== $path) {
+                require $path;
+        }
+}
 
 if (4 < count($argv)) {
 	die('Set Version requires no more than three parameters: version, stability and optional directory' . PHP_EOL);

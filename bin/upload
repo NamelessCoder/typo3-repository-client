@@ -1,7 +1,15 @@
 #!/usr/bin/env php
 <?php
 
-require realpath(__DIR__ . '/../vendor/autoload.php');
+$paths = array(
+        realpath(__DIR__ . '/../vendor/autoload.php'),
+        realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+);
+foreach ($paths as $path) {
+        if (FALSE !== $path) {
+                require $path;
+        }
+}
 
 if (3 > count($argv)) {
 	die('Upload command requires a total of at least three arguments in the following order: username password directory (comment)' . PHP_EOL);
