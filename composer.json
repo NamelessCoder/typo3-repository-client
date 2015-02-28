@@ -10,9 +10,12 @@
     ],
 	"autoload": {
 		"psr-4": {
-			"NamelessCoder\\TYPO3RepositoryClient\\Tests\\Fixtures\\": "tests/fixtures/NamelessCoder/TYPO3RepositoryClient/",
-			"NamelessCoder\\TYPO3RepositoryClient\\Tests\\Unit\\": "tests/unit/NamelessCoder/TYPO3RepositoryClient/",
-			"NamelessCoder\\TYPO3RepositoryClient\\": "src/NamelessCoder/TYPO3RepositoryClient/"
+			"NamelessCoder\\TYPO3RepositoryClient\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"NamelessCoder\\TYPO3RepositoryClient\\Tests\\Unit\\": "tests/unit/"
 		}
 	},
 	"require-dev": {

@@ -10,7 +10,6 @@
          stopOnFailure="false"
          stopOnIncomplete="false"
          stopOnSkipped="false"
-         strict="false"
          verbose="false">
     <testsuites>
         <testsuite name="typo3-repository-client">
@@ -21,7 +20,7 @@
         <whitelist>
             <addUncoveredFilesFromWhitelist>true</addUncoveredFilesFromWhitelist>
             <processUncoveredFilesFromWhitelist>true</processUncoveredFilesFromWhitelist>
-            <directory>src/NamelessCoder/TYPO3RepositoryClient/</directory>
+            <directory>src</directory>
         </whitelist>
     </filter>
 </phpunit>
