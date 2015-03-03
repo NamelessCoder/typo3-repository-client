@@ -162,7 +162,7 @@ class ExtensionUploadPacker {
 		$uploadArray['techInfo'] = 'All good, baby';
 
 		$uploadArray['FILES'] = array();
-		$directoryLength = strlen($directory) + 1;
+		$directoryLength = strlen(rtrim($directory, '/')) + 1;
 		$directoryIterator = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
 		$iterator = new \RecursiveIteratorIterator($directoryIterator);
 		foreach ($iterator as $file) {

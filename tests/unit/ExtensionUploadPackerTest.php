@@ -103,7 +103,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 			),
 			'filesData' => array (
 				array (
-					'name' => '/ext_emconf.php',
+					'name' => 'ext_emconf.php',
 					'size' => 825,
 					'modificationTime' => self::$mtime,
 					'isExecutable' => 0,
