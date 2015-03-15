@@ -19,8 +19,9 @@ class ExtensionUploadPacker {
 	 */
 	public function pack($directory, $username, $password, $comment) {
 		$extensionKey = pathinfo($directory, PATHINFO_FILENAME);
+		$extensionConfiguration = $this->readExtensionConfigurationFile($directory, $extensionKey);
 		$data = $this->createFileDataArray($directory);
-		$data['EM_CONF'] = $this->readExtensionConfigurationFile($directory, $extensionKey);
+		$data['EM_CONF'] = $extensionConfiguration;
 		$soap = $this->createSoapData($extensionKey, $data, $username, $password, $comment);
 		return $soap;
 	}
@@ -38,7 +39,21 @@ class ExtensionUploadPacker {
 		}
 		$EM_CONF = array();
 		include $expectedFilename;
+		$this->validateVersionNumber($EM_CONF[$_EXTKEY]['version']);
 		return $EM_CONF[$_EXTKEY];
+	}
+
+	/**
+	 * @param string $version
+	 * @throws \RuntimeException
+	 */
+	protected function validateVersionNumber($version) {
+		if (1 !== preg_match('/^[\\d]{1,2}\.[\\d]{1,2}\.[\\d]{1,2}$/i', $version)) {
+			throw new \RuntimeException(
+				'Invalid version number "' . $version . '" detected in ext_emconf.php, refusing to pack extension for upload',
+				1426383996
+			);
+		}
 	}
 
 	/**
