@@ -12,7 +12,7 @@ foreach ($paths as $path) {
 }
 
 if (3 > count($argv)) {
-	die('Upload command requires a total of at least three arguments in the following order: username password directory (comment)' . PHP_EOL);
+	die('Upload command requires a total of at least three arguments in the following order: directory username password (comment)' . PHP_EOL);
 }
 
 list (, $directory, $username, $password) = $argv;
