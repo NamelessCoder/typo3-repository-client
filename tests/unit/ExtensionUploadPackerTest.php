@@ -2,7 +2,6 @@
 namespace NamelessCoder\TYPO3RepositoryClient\Tests\Unit;
 
 use NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker;
-use NamelessCoder\TYPO3RepositoryClient\Uploader;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
@@ -23,7 +22,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		'uploadfolder' => 0, 'createDirs' => '', 'modify_tables' => '', 'clearcacheonload' => 1,
 		'lockType' => '', 'author' => 'Author Name', 'author_email' => 'author@domain.com',
 		'author_company' => '', 'CGLcompliance' => '', 'CGLcompliance_note' => '',
-		'constraints' => array('depends' => array('typo3' => '6.1.0-6.2.99', 'cms' => ''), 'conflicts' => array(), 'suggests' => array()),
+		'constraints' => array('depends' => array('typo3' => '6.1.0-6.2.99', 'cms' => ''), 'conflicts' => array(), 'suggests' => array('news' => '')),
 		'_md5_values_when_last_written' => ''
 	);
 
@@ -100,6 +99,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testCreateSoapDataCreatesExpectedOutput() {
 		$directory = vfsStream::url('temp');
+		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $packer */
 		$packer = $this->getMock(
 			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker',
 			array('validateVersionNumber')
@@ -131,6 +131,11 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 							'kind' => 'depends',
 							'extensionKey' => 'cms',
 							'versionRange' => '',
+						),
+						array (
+							'kind' => 'suggests',
+							'extensionKey' => 'news',
+							'versionRange' => '',
 						)
 					),
 					'loadOrder' => '',
@@ -146,8 +151,8 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 					'docPath' => NULL,
 				),
 				'infoData' => array (
-					'codeLines' => 40,
-					'codeBytes' => 833,
+					'codeLines' => 41,
+					'codeBytes' => 853,
 					'codingGuidelinesCompliance' => '',
 					'codingGuidelinesComplianceNotes' => '',
 					'uploadComment' => 'comment',
@@ -157,11 +162,11 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 			'filesData' => array (
 				array (
 					'name' => 'ext_emconf.php',
-					'size' => 833,
+					'size' => 853,
 					'modificationTime' => self::$mtime,
 					'isExecutable' => 0,
 					'content' => self::$fixtureString,
-					'contentMD5' => '81d2cd45f79ac4a7aea0a87e8771e100',
+					'contentMD5' => 'f87088992115285f0932e1f765548085',
 				),
 			),
 		);
@@ -175,7 +180,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
 		$this->setExpectedException('RuntimeException');
-		$configuration = $method->invoke($packer, $directory, $extensionKey);
+		$method->invoke($packer, $directory, $extensionKey);
 	}
 
 	public function testReadExtensionConfigurationFileThrowsExceptionIfVersionInFileIsInvalid() {
@@ -185,12 +190,13 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
 		$this->setExpectedException('RuntimeException');
-		$configuration = $method->invoke($packer, $directory, $extensionKey);
+		$method->invoke($packer, $directory, $extensionKey);
 	}
 
 	public function testPack() {
 		$directory = vfsStream::url('temp');
 		$extensionKey = 'temp';
+		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $mock */
 		$mock = $this->getMock(
 			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker',
 			array('createFileDataArray', 'createSoapData', 'validateVersionNumber')
@@ -213,10 +219,10 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($packer, 'createFileDataArray');
 		$method->setAccessible(TRUE);
 		$result = $method->invoke($packer, $directory);
-		$this->assertEquals(array('extKey' => 'temp', 'misc' => array('codelines' => 40, 'codebytes' => 833),
+		$this->assertEquals(array('extKey' => 'temp', 'misc' => array('codelines' => 41, 'codebytes' => 853),
 			'techInfo' => 'All good, baby', 'FILES' => array('ext_emconf.php' => array('name' => 'ext_emconf.php',
-			'size' => 833, 'mtime' => self::$mtime, 'is_executable' => FALSE, 'content' => self::$fixtureString,
-			'content_md5' => '81d2cd45f79ac4a7aea0a87e8771e100', 'codelines' => 40)
+			'size' => 853, 'mtime' => self::$mtime, 'is_executable' => FALSE, 'content' => self::$fixtureString,
+			'content_md5' => 'f87088992115285f0932e1f765548085', 'codelines' => 41)
 		)), $result);
 	}
 
@@ -247,7 +253,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @dataProvider getExtensionDataAndExpectedDependencyOutput
-	 * $param string $kindOfDependency
+	 * @param string $kindOfDependency
 	 * @param array $extensionData
 	 * @param array $expectedOutout
 	 * @param string $expectedException
