@@ -8,6 +8,7 @@ class ExtensionUploadPacker {
 
 	const KIND_DEPENDENCY = 'depends';
 	const KIND_CONFLICT = 'conflicts';
+	const KIND_SUGGEST = 'suggests';
 	protected $permittedDotFiles = array('.htaccess', '.htpasswd');
 
 	/**
@@ -106,6 +107,7 @@ class ExtensionUploadPacker {
 		// Create dependency / conflict information:
 		$dependenciesArr = $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_DEPENDENCY);
 		$dependenciesArr = array_merge($dependenciesArr, $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_CONFLICT));
+		$dependenciesArr = array_merge($dependenciesArr, $this->createDependenciesArray($extensionData, ExtensionUploadPacker::KIND_SUGGEST));
 
 		// Compile data for SOAP call:
 		$extension = array(
