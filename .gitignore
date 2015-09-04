@@ -2,3 +2,4 @@
 vendor
 bin/coveralls
 bin/phpunit
+build
