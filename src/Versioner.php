@@ -96,9 +96,9 @@ class Versioner {
 	 */
 	protected function writeComposerFile($filename, $version) {
 		$configuration = $this->readComposerFile($filename);
-		if (empty($configuration[self::PARAMETER_VERSION])) {
+		if (TRUE === empty($configuration[self::PARAMETER_VERSION])) {
 			// No version was set in composer.json, so do not enforce it now
-			return true;
+			return TRUE;
 		}
 		$configuration[self::PARAMETER_VERSION] = $version;
 		return file_put_contents($filename, json_encode($configuration, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));

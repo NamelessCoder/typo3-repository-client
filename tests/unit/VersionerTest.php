@@ -229,6 +229,22 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 		);
 	}
 
+	public function testWriteComposerFileReturnsWithoutWritingFileIfFileDoesNotContainVersion() {
+		$versioner = new Versioner();
+		$method = new \ReflectionMethod($versioner, 'writeComposerFile');
+		$method->setAccessible(TRUE);
+		$fixture = self::$fixture;
+		unset($fixture['version']);
+		$noVersionFile = Versioner::FILENAME_COMPOSER . '.noversion.json';
+		$newComposerFile = new vfsStreamFile($noVersionFile);
+		$newComposerFile->setContent(json_encode($fixture, JSON_UNESCAPED_SLASHES));
+		vfsStreamWrapper::getRoot()->addChild($newComposerFile);
+		$vfsUrl = vfsStream::url('temp/' . $noVersionFile);
+		$result = $method->invokeArgs($versioner, array($vfsUrl, '1.2.3'));
+		$this->assertTrue($result);
+		$this->assertNotContains('1.2.3', file_get_contents($vfsUrl));
+	}
+
 	/**
 	 * @param string $filename
 	 * @param string $version
