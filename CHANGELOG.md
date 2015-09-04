@@ -7,6 +7,7 @@ Changelog - TYPO3 Extension Repository Client
 - Suggested extensions now included in TER request (Thanks to @helhum)
 - Third-party binaries added to ignored files (Thanks @helhum)
 - `setversion` command improved; graceful handling of `composer.json` version (Thanks @helhum)
+- Composer branch alias `$version-dev` usage introduced  (Thanks @helhum)
 
 1.1.1 - 2015-08-08
 ------------------
