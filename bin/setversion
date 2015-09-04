@@ -2,28 +2,31 @@
 <?php
 
 $paths = array(
-        realpath(__DIR__ . '/../vendor/autoload.php'),
-        realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+		realpath(__DIR__ . '/../vendor/autoload.php'),
+		realpath(__DIR__ . '/../../../../vendor/autoload.php'),
 );
 foreach ($paths as $path) {
-        if (FALSE !== $path) {
-                require $path;
-        }
+		if (FALSE !== $path) {
+				require $path;
+		}
 }
 
 if (4 < count($argv)) {
 	die('Set Version requires no more than three parameters: version, stability and optional directory' . PHP_EOL);
 }
 
+$stability = \NamelessCoder\TYPO3RepositoryClient\Versioner::STABILITY_STABLE;
+$directory = trim(shell_exec('pwd'));
 if (4 === count($argv)) {
 	list (, $version, $stability, $directory) = $argv;
 } elseif (3 === count($argv)) {
 	list (, $version, $stability) = $argv;
-	$directory = trim(shell_exec('pwd'));
 } elseif (2 === count($argv)) {
 	list (, $version) = $argv;
-	$directory = trim(shell_exec('pwd'));
-	$version = \NamelessCoder\TYPO3RepositoryClient\Versioner::STABILITY_STABLE;
+}
+
+if (empty($version)) {
+	die('Version is a required parameter' . PHP_EOL);
 }
 
 $versioner = new \NamelessCoder\TYPO3RepositoryClient\Versioner();
