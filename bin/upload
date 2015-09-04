@@ -2,13 +2,13 @@
 <?php
 
 $paths = array(
-        realpath(__DIR__ . '/../vendor/autoload.php'),
-        realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+		realpath(__DIR__ . '/../vendor/autoload.php'),
+		realpath(__DIR__ . '/../../../../vendor/autoload.php'),
 );
 foreach ($paths as $path) {
-        if (FALSE !== $path) {
-                require $path;
-        }
+		if (FALSE !== $path) {
+				require $path;
+		}
 }
 
 if (3 > count($argv)) {
