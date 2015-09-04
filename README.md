@@ -25,6 +25,28 @@ And as CLI command:
 ./bin/upload /path/to/extension myusername mypassword "An optional comment"
 ```
 
+### Version Updater (local)
+
+As component:
+
+```php
+$versioner = new \NamelessCoder\TYPO3RepositoryClient\Versioner();
+$version = $versioner->read('/path/to/extension/');
+$version[0] = '1.2.3';
+$version[1] = 'beta';
+$versioner->write('/path/to/extension/', '1.2.3', 'beta');
+
+```
+
+And as CLI command:
+
+```bash
+# with all parameters
+./bin/setversion 1.2.3 beta /optional/path/to/extension/
+# without changing current stability:
+./bin/setversion 1.2.3
+```
+
 ### Version Deleter (admins only)
 
 As component:
