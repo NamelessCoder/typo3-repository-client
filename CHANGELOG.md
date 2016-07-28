@@ -1,7 +1,7 @@
 Changelog - TYPO3 Extension Repository Client
 =============================================
 
-1.2.0 - Pending
+1.2.0 - 2016-07-28
 ------------------
 
 - Suggested extensions now included in TER request (Thanks to @helhum)
