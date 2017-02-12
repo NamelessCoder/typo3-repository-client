@@ -1,6 +1,12 @@
 Changelog - TYPO3 Extension Repository Client
 =============================================
 
+1.3.0 - 2017-02-12
+------------------
+
+- Added processing of `.gitignore` rules as exclude list before uploading. Allows the binary to be executed from local
+  repositories without first cleaning up the folder to remove any files not intended for TER upload.
+
 1.2.0 - 2016-07-28
 ------------------
 
