@@ -1,7 +1,14 @@
 Changelog - TYPO3 Extension Repository Client
 =============================================
 
+2.0.0 - 2017-02-12
+------------------
+
+- Dropped support for discontinued PHP 5.x branches
+- Implemented Generators to resolve files more efficiently
+
 1.3.1 - 2017-02-12
+------------------
 
 - Avoided sub-generators to preserve PHP 5.x compatibility.
 - This is the last PHP 5.x compatible release; future ones will be PHP 7.0+.
