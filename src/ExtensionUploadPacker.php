@@ -180,32 +180,72 @@ class ExtensionUploadPacker {
 
 		$uploadArray['FILES'] = array();
 		$directoryLength = strlen(rtrim($directory, '/')) + 1;
-		$directoryIterator = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
-		$iterator = new \RecursiveIteratorIterator($directoryIterator);
-		foreach ($iterator as $file) {
+
+		$gitIgnoreFile = $directory . '/.gitignore';
+		$skipFiles = [];
+		if (file_exists($gitIgnoreFile)) {
+            $lines = file($gitIgnoreFile);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                // Since we only support the root .gitignore as skip list, all paths *are* relative. Strip absolute.
+                $line = ltrim($line, '/');
+                if ($line === '') continue;                 # empty line
+                if (substr($line, 0, 1) == '#') continue;   # a comment
+                if (substr($line, 0, 1) == '!') {           # negated glob
+                    $line = substr($line, 1);
+                    $files = array_diff(glob("$directory/*"), glob("$directory/$line"));
+                } else {                                    # normal glob
+                    $files = glob("$directory/$line");
+                }
+                $skipFiles = array_merge($skipFiles, $files);
+            }
+        }
+
+		foreach ($this->recursivelyScanFolderForFiles($directory, $skipFiles) as $file) {
 			/** @var \SplFileInfo $file */
-			if (TRUE === $this->isFilePermitted($file, $directory)) {
-				$filename = $file->getPathname();
-				$relativeFilename = substr($filename, $directoryLength);
-				$extension = pathinfo($filename, PATHINFO_EXTENSION);
-				$uploadArray['FILES'][$relativeFilename] = array(
-					'name' => $relativeFilename,
-					'size' => filesize($file),
-					'mtime' => filemtime($file),
-					'is_executable' => is_executable($file),
-					'content' => file_get_contents($file)
-				);
-				if (TRUE === in_array($extension, array('php', 'inc'))) {
-					$uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(PHP_EOL, $uploadArray['FILES'][$relativeFilename]['content']));
-					$uploadArray['misc']['codelines'] += $uploadArray['FILES'][$relativeFilename]['codelines'];
-					$uploadArray['misc']['codebytes'] += $uploadArray['FILES'][$relativeFilename]['size'];
-				}
-				$uploadArray['FILES'][$relativeFilename]['content_md5'] = md5($uploadArray['FILES'][$relativeFilename]['content']);
-			}
+            $filename = $file->getPathname();
+            $relativeFilename = substr($filename, $directoryLength);
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            $uploadArray['FILES'][$relativeFilename] = array(
+                'name' => $relativeFilename,
+                'size' => filesize($filename    ),
+                'mtime' => filemtime($filename),
+                'is_executable' => is_executable($filename),
+                'content' => file_get_contents($filename)
+            );
+            if (TRUE === in_array($extension, array('php', 'inc'))) {
+                $uploadArray['FILES'][$relativeFilename]['codelines'] = count(explode(PHP_EOL, $uploadArray['FILES'][$relativeFilename]['content']));
+                $uploadArray['misc']['codelines'] += $uploadArray['FILES'][$relativeFilename]['codelines'];
+                $uploadArray['misc']['codebytes'] += $uploadArray['FILES'][$relativeFilename]['size'];
+            }
+            $uploadArray['FILES'][$relativeFilename]['content_md5'] = md5($uploadArray['FILES'][$relativeFilename]['content']);
 		}
 
 		return $uploadArray;
 	}
+
+    /**
+     * @param string $directory
+     * @param array $skipFiles
+     * @return \Generator
+     */
+	protected function recursivelyScanFolderForFiles($directory, array $skipFiles) {
+	    $iterator = new \DirectoryIterator($directory);
+	    foreach ($iterator as $fileOrFolder) {
+	        if (!$this->isFilePermitted($fileOrFolder, $directory)) {
+	            continue;
+            }
+            if (in_array($fileOrFolder->getPathname(), $skipFiles)) {
+                echo 'Skipped ' . $fileOrFolder->getPathname() . PHP_EOL;
+	            continue;
+            }
+            if ($fileOrFolder->isDir()) {
+	            yield from $this->recursivelyScanFolderForFiles($fileOrFolder->getPathname(), $skipFiles);
+            } else {
+                yield $fileOrFolder;
+            }
+        }
+    }
 
 	/**
 	 * @param \SplFileInfo $file
