@@ -1,11 +1,13 @@
 <?php
 namespace NamelessCoder\TYPO3RepositoryClient\Tests\Unit;
+
 use NamelessCoder\TYPO3RepositoryClient\Connection;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class ConnectionTest
  */
-class ConnectionTest extends \PHPUnit_Framework_TestCase {
+class ConnectionTest extends TestCase {
 
 	public function testGetAuthenticationHeaderReturnsSoapHeader() {
 		$connection = new Connection();
@@ -32,12 +34,12 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 	public function testCall($function, $output, $expectedExceptionMessage, $expectedExceptionType) {
 		$parameters = array('foo' => 'bar');
 		$settings = array('exceptions' => TRUE, 'trace' => TRUE);
-		$client = $this->getMock('SoapClient', array('__soapCall'), array(), '', FALSE);
+		$client = $this->getMockBuilder('SoapClient')->setMethods(array('__soapCall'))->disableOriginalConstructor()->getMock();
 		$client->expects($this->once())->method('__soapCall')->with($function, $parameters, $settings)->will($this->returnValue($output));
-		$connection = $this->getMock('NamelessCoder\\TYPO3RepositoryClient\\Connection', array('getSoapClientForWsdl'));
+		$connection = $this->getMockBuilder('NamelessCoder\\TYPO3RepositoryClient\\Connection')->setMethods(array('getSoapClientForWsdl'))->getMock();
 		$connection->expects($this->once())->method('getSoapClientForWsdl')->with(Connection::WSDL_URL)->will($this->returnValue($client));
 		if (NULL !== $expectedExceptionType) {
-			$this->setExpectedException($expectedExceptionType, $expectedExceptionMessage);
+			$this->expectException($expectedExceptionType, $expectedExceptionMessage);
 		}
 		$connection->call($function, $parameters, 'usernamefoobar', 'passwordfoobar');
 	}

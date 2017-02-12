@@ -6,11 +6,12 @@ use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
 use org\bovigo\vfs\vfsStreamWrapper;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class ExtensionUploadPackerTest
  */
-class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
+class ExtensionUploadPackerTest extends TestCase {
 
 	/**
 	 * @var array
@@ -56,7 +57,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$plugin = new ExtensionUploadPacker();
 		$method = new \ReflectionMethod($plugin, 'validateVersionNumber');
 		$method->setAccessible(TRUE);
-		$this->setExpectedException('RuntimeException');
+		$this->expectException('RuntimeException');
 		$method->invokeArgs($plugin, array($version));
 	}
 
@@ -100,10 +101,11 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 	public function testCreateSoapDataCreatesExpectedOutput() {
 		$directory = vfsStream::url('temp');
 		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $packer */
-		$packer = $this->getMock(
-			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker',
+		$packer = $this->getMockBuilder(
+			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker'
+        )->setMethods(
 			array('validateVersionNumber')
-		);
+		)->getMock();
 		$packer->expects($this->once())->method('validateVersionNumber');
 		$result = $packer->pack($directory, 'username', 'password', 'comment');
 		$expected = array (
@@ -179,7 +181,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$packer = new ExtensionUploadPacker();
 		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
-		$this->setExpectedException('RuntimeException');
+		$this->expectException('RuntimeException');
 		$method->invoke($packer, $directory, $extensionKey);
 	}
 
@@ -189,7 +191,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$packer = new ExtensionUploadPacker();
 		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
-		$this->setExpectedException('RuntimeException');
+		$this->expectException('RuntimeException');
 		$method->invoke($packer, $directory, $extensionKey);
 	}
 
@@ -197,10 +199,11 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$directory = vfsStream::url('temp');
 		$extensionKey = 'temp';
 		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $mock */
-		$mock = $this->getMock(
-			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker',
+		$mock = $this->getMockBuilder(
+			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker'
+        )->setMethods(
 			array('createFileDataArray', 'createSoapData', 'validateVersionNumber')
-		);
+		)->getMock();
 		$method = new \ReflectionMethod($mock, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
 		$configuration = $method->invoke($mock, $directory, $extensionKey);
@@ -263,7 +266,7 @@ class ExtensionUploadPackerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($uploader, 'createDependenciesArray');
 		$method->setAccessible(TRUE);
 		if (NULL !== $expectedException) {
-			$this->setExpectedException($expectedException);
+			$this->expectException($expectedException);
 		}
 		$output = $method->invoke($uploader, $extensionData, $kindOfDependency);
 		$this->assertEquals($expectedOutout, $output);

@@ -1,10 +1,12 @@
 <?php
 namespace NamelessCoder\TYPO3RepositoryClient\Tests\Unit;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Class SoapDataCompilerTest
  */
-class SoapDataCompilerTest extends \PHPUnit_Framework_TestCase {
+class SoapDataCompilerTest extends TestCase {
 
 	/**
 	 * @param string $username

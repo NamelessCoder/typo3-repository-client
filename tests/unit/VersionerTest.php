@@ -6,11 +6,12 @@ use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
 use org\bovigo\vfs\vfsStreamWrapper;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class VersionerTest
  */
-class VersionerTest extends \PHPUnit_Framework_TestCase {
+class VersionerTest extends TestCase {
 
 	/**
 	 * @var array
@@ -48,10 +49,11 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 			Versioner::PARAMETER_VERSION => '1.2.3',
 			Versioner::PARAMETER_STABILITY => Versioner::STABILITY_STABLE
 		);
-		$versioner = $this->getMock(
-			'NamelessCoder\\TYPO3RepositoryClient\\Versioner',
+		$versioner = $this->getMockBuilder(
+			'NamelessCoder\\TYPO3RepositoryClient\\Versioner'
+        )->setMethods(
 			array('getExtensionConfigurationFilename', 'readExtensionConfigurationFile')
-		);
+		)->getMock();
 		$versioner->expects($this->once())->method('getExtensionConfigurationFilename');
 		$versioner->expects($this->once())->method('readExtensionConfigurationFile')->will($this->returnValue($return));
 		$result = $versioner->read('.');
@@ -64,21 +66,22 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider getWriteTestValues
 	 */
 	public function testWrite($composerUnwritable, $extensionConfigurationUnwritable) {
-		$versioner = $this->getMock(
-			'NamelessCoder\\TYPO3RepositoryClient\\Versioner',
+		$versioner = $this->getMockBuilder(
+			'NamelessCoder\\TYPO3RepositoryClient\\Versioner'
+        )->setMethods(
 			array('getExtensionConfigurationFilename', 'getComposerFilename', 'writeComposerFile', 'writeExtensionConfigurationFile')
-		);
+		)->getMock();
 		$versioner->expects($this->once())->method('getExtensionConfigurationFilename');
 		$versioner->expects($this->once())->method('getComposerFilename');
 		if (TRUE === $composerUnwritable) {
-			$this->setExpectedException('RuntimeException');
+			$this->expectException('RuntimeException');
 			$versioner->expects($this->once())->method('writeComposerFile')->will($this->returnValue(FALSE));
 		} else {
 			$versioner->expects($this->once())->method('writeComposerFile')->will($this->returnValue(TRUE));
 			if (TRUE === $extensionConfigurationUnwritable) {
 				$versioner->expects($this->once())->method('writeExtensionConfigurationFile')->will($this->returnValue(TRUE));
 			} else {
-				$this->setExpectedException('RuntimeException');
+				$this->expectException('RuntimeException');
 				$versioner->expects($this->once())->method('writeExtensionConfigurationFile')->will($this->returnValue(FALSE));
 			}
 		}
@@ -157,7 +160,7 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($versioner, 'readComposerFile');
 		$method->setAccessible(TRUE);
 		if (TRUE === $expectsException) {
-			$this->setExpectedException('RuntimeException');
+			$this->expectException('RuntimeException');
 		}
 		$result = $method->invokeArgs($versioner, array($filename));
 		$this->assertEquals($expectedData, $result);
@@ -184,7 +187,7 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($versioner, 'readExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
 		if (TRUE === $expectsException) {
-			$this->setExpectedException('RuntimeException');
+			$this->expectException('RuntimeException');
 		}
 		$result = $method->invokeArgs($versioner, array($filename));
 		$this->assertEquals($expectedData, $result);
@@ -212,7 +215,7 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($versioner, 'writeComposerFile');
 		$method->setAccessible(TRUE);
 		if (TRUE === $expectsException) {
-			$this->setExpectedException('RuntimeException');
+			$this->expectException('RuntimeException');
 		}
 		$result = $method->invokeArgs($versioner, array($filename, $version));
 		$this->assertStringEqualsFile($filename, $expectedData);
@@ -261,7 +264,7 @@ class VersionerTest extends \PHPUnit_Framework_TestCase {
 		$method = new \ReflectionMethod($versioner, 'writeExtensionConfigurationFile');
 		$method->setAccessible(TRUE);
 		if (TRUE === $expectsException) {
-			$this->setExpectedException('RuntimeException');
+			$this->expectException('RuntimeException');
 		}
 		$result = $method->invokeArgs($versioner, array($filename, $version, $stability));
 		$this->assertStringEqualsFile($filename, $expectedData);
