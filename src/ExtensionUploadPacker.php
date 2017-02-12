@@ -201,7 +201,9 @@ class ExtensionUploadPacker {
             }
         }
 
-		foreach ($this->recursivelyScanFolderForFiles($directory, $skipFiles) as $filename) {
+		foreach ($this->recursivelyScanFolderForFiles($directory, $skipFiles) as $file) {
+			/** @var \SplFileInfo $file */
+            $filename = $file->getPathname();
             $relativeFilename = substr($filename, $directoryLength);
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
             $uploadArray['FILES'][$relativeFilename] = array(
@@ -225,11 +227,10 @@ class ExtensionUploadPacker {
     /**
      * @param string $directory
      * @param array $skipFiles
-     * @return array
+     * @return \Generator
      */
 	protected function recursivelyScanFolderForFiles($directory, array $skipFiles) {
 	    $iterator = new \DirectoryIterator($directory);
-	    $files = [];
 	    foreach ($iterator as $fileOrFolder) {
 	        if (!$this->isFilePermitted($fileOrFolder, $directory)) {
 	            continue;
@@ -239,12 +240,11 @@ class ExtensionUploadPacker {
 	            continue;
             }
             if ($fileOrFolder->isDir()) {
-	            $files = array_merge($files, $this->recursivelyScanFolderForFiles($fileOrFolder->getPathname(), $skipFiles));
+	            yield from $this->recursivelyScanFolderForFiles($fileOrFolder->getPathname(), $skipFiles);
             } else {
-                $files[] = $fileOrFolder->getPathname();
+                yield $fileOrFolder;
             }
         }
-        return $files;
     }
 
 	/**
