@@ -10,13 +10,11 @@ foreach ($paths as $path) {
 				require $path;
 		}
 }
-
-if (3 > count($argv)) {
-	die('Upload command requires a total of at least three arguments in the following order: directory username password (comment)' . PHP_EOL);
+if (5 > count($argv)) {
+	die('Upload command requires a total of four arguments in the following order: directory username password comment' . PHP_EOL);
 }
 
-list (, $directory, $username, $password) = $argv;
-$comment = TRUE === isset($argv[4]) ? $argv[4] : NULL;
+list (, $directory, $username, $password, $comment) = $argv;
 
 $uploader = new \NamelessCoder\TYPO3RepositoryClient\Uploader();
 $directory = realpath($directory);
