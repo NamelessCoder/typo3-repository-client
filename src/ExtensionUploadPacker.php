@@ -36,7 +36,7 @@ class ExtensionUploadPacker {
 	protected function readExtensionConfigurationFile($directory, $_EXTKEY) {
 		$expectedFilename = $directory . '/ext_emconf.php';
 		if (FALSE === file_exists($expectedFilename)) {
-			throw new \RuntimeException('Directory "' . $directory . "' does not contain an ext_emconf.php file");
+			throw new \RuntimeException('Directory "' . $directory . '" does not contain an ext_emconf.php file');
 		}
 		$EM_CONF = array();
 		include $expectedFilename;
