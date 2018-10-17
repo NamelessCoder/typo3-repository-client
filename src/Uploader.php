@@ -13,7 +13,7 @@ class Uploader {
 	 * @param string $comment
 	 * @return array
 	 */
-	public function upload($directory, $username, $password, $comment = NULL) {
+	public function upload($directory, $username, $password, $comment) {
 		return $this->getConnection()->call(
 			Connection::FUNCTION_UPLOAD,
 			$this->getExtensionUploadPacker()->pack($directory, $username, $password, $comment),
