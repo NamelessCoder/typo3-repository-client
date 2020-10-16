@@ -61,3 +61,12 @@ And as CLI command:
 ```bash
 ./bin/rmversion extensionkey 1.2.3 myusername mypassword
 ```
+
+
+FAQ
+---
+
+### Excluded files and folders
+
+* Dotfiles (like `.editorconfig` or `.php_cs.dist`) will be ignored except for `.htpasswd` and `.htaccess` files.
+* Use a `.gitignore` file to exclude more files and folders from being included in the final TER release.
