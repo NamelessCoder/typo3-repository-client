@@ -271,7 +271,7 @@ class ExtensionUploadPacker {
 	 * @return boolean
 	 */
 	protected function isDotFileAndNotPermitted($filename) {
-		return (FALSE === empty($filename) && '.' === $filename{0} && FALSE === in_array($filename, $this->permittedDotFiles));
+		return (FALSE === empty($filename) && '.' === $filename[0] && FALSE === in_array($filename, $this->permittedDotFiles));
 	}
 
 }
