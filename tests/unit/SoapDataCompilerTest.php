@@ -6,37 +6,37 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class SoapDataCompilerTest
  */
-class SoapDataCompilerTest extends TestCase {
+class SoapDataCompilerTest extends TestCase
+{
+    /**
+     * @param string $username
+     * @param string $password
+     * @param array $data
+     * @param array $expectation
+     * @dataProvider getCreateSoapDataTestValues
+     */
+    public function testCreateSoapData($username, $password, $data, $expectation)
+    {
+    }
 
-	/**
-	 * @param string $username
-	 * @param string $password
-	 * @param array $data
-	 * @param array $expectation
-	 * @dataProvider getCreateSoapDataTestValues
-	 */
-	public function testCreateSoapData($username, $password, $data, $expectation) {
-
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getCreateSoapDataTestValues() {
-		return array(
-			array(
-				'user',
-				'pass',
-				array('foo' => 'bar'),
-				array('foo' => 'bar', 'accountData' => array('username' => 'user', 'password' => 'pass'))
-			),
-			array(
-				'user',
-				'pass',
-				array('foo' => 'bar', 'accountData' => array('username' => 'user2', 'password' => 'pass2')),
-				array('foo' => 'bar', 'accountData' => array('username' => 'user2', 'password' => 'pass2'))
-			),
-		);
-	}
-
+    /**
+     * @return array
+     */
+    public function getCreateSoapDataTestValues(): array
+    {
+        return [
+            [
+                'user',
+                'pass',
+                ['foo' => 'bar'],
+                ['foo' => 'bar', 'accountData' => ['username' => 'user', 'password' => 'pass']]
+            ],
+            [
+                'user',
+                'pass',
+                ['foo' => 'bar', 'accountData' => ['username' => 'user2', 'password' => 'pass2']],
+                ['foo' => 'bar', 'accountData' => ['username' => 'user2', 'password' => 'pass2']]
+            ],
+        ];
+    }
 }
