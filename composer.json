@@ -19,12 +19,13 @@
         }
     },
     "require": {
-        "php": "^7.0"
+        "php": "^7.0",
+        "ext-soap": "*"
     },
     "require-dev": {
         "mikey179/vfsstream": "~1.3.0",
-        "satooshi/php-coveralls": "*",
-        "phpunit/phpunit": "^6.0"
+        "satooshi/php-coveralls": "^2.2",
+        "phpunit/phpunit": "^6.5"
     },
     "extra": {
         "branch-alias": {
@@ -32,9 +33,9 @@
         }
     },
     "bin": [
+        "bin/rmversion",
         "bin/setversion",
-        "bin/upload",
-        "bin/rmversion"
+        "bin/upload"
     ],
     "config": {
         "bin-dir": "bin"
