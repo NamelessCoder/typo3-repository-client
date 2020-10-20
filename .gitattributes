@@ -1,0 +1,4 @@
+/tests export-ignore
+/composer.lock export-ignore
+/phpunit.xml.dist export-ignore
+/.* export-ignore
