@@ -11,350 +11,445 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class ExtensionUploadPackerTest
  */
-class ExtensionUploadPackerTest extends TestCase {
+class ExtensionUploadPackerTest extends TestCase
+{
+    /**
+     * @var array
+     */
+    protected static $fixture = [
+        'title' => 'Dummy title',
+        'description' => 'Dummy description',
+        'category' => 'misc',
+        'shy' => 0,
+        'version' => '1.2.3-invalid',
+        'dependencies' => 'cms,extbase,fluid',
+        'conflicts' => '',
+        'priority' => '',
+        'loadOrder' => '',
+        'module' => '',
+        'state' => 'beta',
+        'uploadfolder' => 0,
+        'createDirs' => '',
+        'modify_tables' => '',
+        'clearcacheonload' => 1,
+        'lockType' => '',
+        'author' => 'Author Name',
+        'author_email' => 'author@domain.com',
+        'author_company' => '',
+        'CGLcompliance' => '',
+        'CGLcompliance_note' => '',
+        'constraints' => [
+            'depends' => [
+                'typo3' => '6.1.0-6.2.99',
+                'cms' => ''
+            ],
+            'conflicts' => [],
+            'suggests' => [
+                'news' => ''
+            ]
+        ],
+        '_md5_values_when_last_written' => ''
+    ];
 
-	/**
-	 * @var array
-	 */
-	protected static $fixture = array(
-		'title' => 'Dummy title', 'description' => 'Dummy description',
-		'category' => 'misc', 'shy' => 0, 'version' => '1.2.3-invalid', 'dependencies' => 'cms,extbase,fluid',
-		'conflicts' => '', 'priority' => '', 'loadOrder' => '', 'module' => '', 'state' => 'beta',
-		'uploadfolder' => 0, 'createDirs' => '', 'modify_tables' => '', 'clearcacheonload' => 1,
-		'lockType' => '', 'author' => 'Author Name', 'author_email' => 'author@domain.com',
-		'author_company' => '', 'CGLcompliance' => '', 'CGLcompliance_note' => '',
-		'constraints' => array('depends' => array('typo3' => '6.1.0-6.2.99', 'cms' => ''), 'conflicts' => array(), 'suggests' => array('news' => '')),
-		'_md5_values_when_last_written' => ''
-	);
+    /**
+     * @var string
+     */
+    protected static $fixtureString;
 
-	/**
-	 * @var string
-	 */
-	protected static $fixtureString = NULL;
+    /**
+     * @var integer
+     */
+    protected static $mtime;
 
-	/**
-	 * @var integer
-	 */
-	protected static $mtime = NULL;
-
-	public static function setUpBeforeClass() {
-		self::$mtime = time();
-		self::$fixtureString = '<' . '?php
-			$EM_CONF[$_EXTKEY] = ' . var_export(self::$fixture, TRUE) . ';
+    public static function setUpBeforeClass()
+    {
+        self::$mtime = time();
+        self::$fixtureString = '<' . '?php
+			$EM_CONF[$_EXTKEY] = ' . var_export(self::$fixture, true) . ';
 		';
-		$emConf = new vfsStreamFile('ext_emconf.php');
-		$emConf->setContent(self::$fixtureString);
-		vfsStreamWrapper::register();
-		vfsStreamWrapper::setRoot(new vfsStreamDirectory('temp', 0777));
-		vfsStreamWrapper::getRoot()->addChild($emConf);
-	}
+        $emConf = new vfsStreamFile('ext_emconf.php');
+        $emConf->setContent(self::$fixtureString);
+        vfsStreamWrapper::register();
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('temp', 0777));
+        vfsStreamWrapper::getRoot()->addChild($emConf);
+    }
 
-	/**
-	 * @dataProvider getValidateVersionInvalidTestValues
-	 * @param mixed $version
-	 */
-	public function testThrowsRuntimeExceptionOnInvalidVersionNumberInConfiguration($version) {
-		$plugin = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($plugin, 'validateVersionNumber');
-		$method->setAccessible(TRUE);
-		$this->expectException('RuntimeException');
-		$method->invokeArgs($plugin, array($version));
-	}
+    /**
+     * @dataProvider getValidateVersionInvalidTestValues
+     * @param mixed $version
+     */
+    public function testThrowsRuntimeExceptionOnInvalidVersionNumberInConfiguration($version)
+    {
+        $plugin = new ExtensionUploadPacker();
 
-	/**
-	 * @return array
-	 */
-	public function getValidateVersionInvalidTestValues() {
-		return array(
-			array('foobar'),
-			array('f.o.b'),
-			array('-1.0.0'),
-			array('1.0.0-dev'),
-			array('test-tag'),
-			array('accidental.dotcount.match')
-		);
-	}
+        $method = new \ReflectionMethod($plugin, 'validateVersionNumber');
+        $method->setAccessible(true);
 
-	/**
-	 * @dataProvider getValidateVersionValidTestValues
-	 * @param mixed $version
-	 */
-	public function testValidateVersionNumber($version) {
-		$plugin = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($plugin, 'validateVersionNumber');
-		$method->setAccessible(TRUE);
-		$result = $method->invokeArgs($plugin, array($version));
-		$this->assertNull($result);
-	}
+        $this->expectException('RuntimeException');
 
-	/**
-	 * @return array
-	 */
-	public function getValidateVersionValidTestValues() {
-		return array(
-			array('0.0.1'),
-			array('1.2.3'),
-			array('3.2.1')
-		);
-	}
+        $method->invokeArgs($plugin, [$version]);
+    }
 
-	public function testCreateSoapDataCreatesExpectedOutput() {
-		$directory = vfsStream::url('temp');
-		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $packer */
-		$packer = $this->getMockBuilder(
-			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker'
-        )->setMethods(
-			array('validateVersionNumber')
-		)->getMock();
-		$packer->expects($this->once())->method('validateVersionNumber');
-		$result = $packer->pack($directory, 'username', 'password', 'comment');
-		$expected = array (
-			'accountData' => array('username' => 'username', 'password' => 'password'),
-			'extensionData' => array (
-				'extensionKey' => 'temp',
-				'version' => '1.2.3-invalid',
-				'metaData' => array (
-					'title' => 'Dummy title',
-					'description' => 'Dummy description',
-					'category' => 'misc',
-					'state' => 'beta',
-					'authorName' => 'Author Name',
-					'authorEmail' => 'author@domain.com',
-					'authorCompany' => '',
-				),
-				'technicalData' => array (
-					'dependencies' => array (
-						array (
-							'kind' => 'depends',
-							'extensionKey' => 'typo3',
-							'versionRange' => '6.1.0-6.2.99',
-						),
-						array (
-							'kind' => 'depends',
-							'extensionKey' => 'cms',
-							'versionRange' => '',
-						),
-						array (
-							'kind' => 'suggests',
-							'extensionKey' => 'news',
-							'versionRange' => '',
-						)
-					),
-					'loadOrder' => '',
-					'uploadFolder' => FALSE,
-					'createDirs' => '',
-					'shy' => 0,
-					'modules' => '',
-					'modifyTables' => '',
-					'priority' => '',
-					'clearCacheOnLoad' => FALSE,
-					'lockType' => '',
-					'doNotLoadInFEe' => NULL,
-					'docPath' => NULL,
-				),
-				'infoData' => array (
-					'codeLines' => 41,
-					'codeBytes' => 853,
-					'codingGuidelinesCompliance' => '',
-					'codingGuidelinesComplianceNotes' => '',
-					'uploadComment' => 'comment',
-					'techInfo' => 'All good, baby',
-				),
-			),
-			'filesData' => array (
-				array (
-					'name' => 'ext_emconf.php',
-					'size' => 853,
-					'modificationTime' => self::$mtime,
-					'isExecutable' => 0,
-					'content' => self::$fixtureString,
-					'contentMD5' => 'f87088992115285f0932e1f765548085',
-				),
-			),
-		);
-		$this->assertEquals($expected, $result);
-	}
+    /**
+     * @return array
+     */
+    public function getValidateVersionInvalidTestValues()
+    {
+        return [
+            ['foobar'],
+            ['f.o.b'],
+            ['-1.0.0'],
+            ['1.0.0-dev'],
+            ['test-tag'],
+            ['accidental.dotcount.match']
+        ];
+    }
 
-	public function testReadExtensionConfigurationFileThrowsExceptionIfFileDoesNotExist() {
-		$directory = vfsStream::url('doesnotexist');
-		$extensionKey = 'temp';
-		$packer = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
-		$method->setAccessible(TRUE);
-		$this->expectException('RuntimeException');
-		$method->invoke($packer, $directory, $extensionKey);
-	}
+    /**
+     * @dataProvider getValidateVersionValidTestValues
+     * @param mixed $version
+     */
+    public function testValidateVersionNumber($version)
+    {
+        $plugin = new ExtensionUploadPacker();
+        $method = new \ReflectionMethod($plugin, 'validateVersionNumber');
+        $method->setAccessible(true);
+        $result = $method->invokeArgs($plugin, [$version]);
+        self::assertNull($result);
+    }
 
-	public function testReadExtensionConfigurationFileThrowsExceptionIfVersionInFileIsInvalid() {
-		$directory = vfsStream::url('ext_emconf.php');
-		$extensionKey = 'temp';
-		$packer = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
-		$method->setAccessible(TRUE);
-		$this->expectException('RuntimeException');
-		$method->invoke($packer, $directory, $extensionKey);
-	}
+    /**
+     * @return array
+     */
+    public function getValidateVersionValidTestValues()
+    {
+        return [
+            ['0.0.1'],
+            ['1.2.3'],
+            ['3.2.1']
+        ];
+    }
 
-	public function testPack() {
-		$directory = vfsStream::url('temp');
-		$extensionKey = 'temp';
-		/** @var \NamelessCoder\TYPO3RepositoryClient\ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $mock */
-		$mock = $this->getMockBuilder(
-			'NamelessCoder\\TYPO3RepositoryClient\\ExtensionUploadPacker'
-        )->setMethods(
-			array('createFileDataArray', 'createSoapData', 'validateVersionNumber')
-		)->getMock();
-		$method = new \ReflectionMethod($mock, 'readExtensionConfigurationFile');
-		$method->setAccessible(TRUE);
-		$configuration = $method->invoke($mock, $directory, $extensionKey);
-		$mock->expects($this->once())->method('createFileDataArray')
-			->with($directory)->will($this->returnValue(array('foo' => 'bar')));
-		$mock->expects($this->once())->method('createSoapData')
-			->with($extensionKey, array('foo' => 'bar', 'EM_CONF' => $configuration), 'usernamefoo', 'passwordfoo', 'commentfoo')
-			->will($this->returnValue('test'));
-		$result = $mock->pack($directory, 'usernamefoo', 'passwordfoo', 'commentfoo');
-		$this->assertEquals('test', $result);
-	}
+    public function testCreateSoapDataCreatesExpectedOutput()
+    {
+        $directory = vfsStream::url('temp');
 
-	public function testCreateFileDataArray() {
-		$directory = vfsStream::url('temp/');
-		$packer = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($packer, 'createFileDataArray');
-		$method->setAccessible(TRUE);
-		$result = $method->invoke($packer, $directory);
-		$this->assertEquals(array('extKey' => 'temp', 'misc' => array('codelines' => 41, 'codebytes' => 853),
-			'techInfo' => 'All good, baby', 'FILES' => array('ext_emconf.php' => array('name' => 'ext_emconf.php',
-			'size' => 853, 'mtime' => self::$mtime, 'is_executable' => FALSE, 'content' => self::$fixtureString,
-			'content_md5' => 'f87088992115285f0932e1f765548085', 'codelines' => 41)
-		)), $result);
-	}
+        /** @var ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $packer */
+        $packer = $this->getMockBuilder(ExtensionUploadPacker::class)
+            ->setMethods(['validateVersionNumber'])
+            ->getMock();
 
-	/**
-	 * @dataProvider getSettingsAndValues
-	 * @param array $settings
-	 * @param string $settingName
-	 * @param mixed $defaultValue
-	 * @param mixed $expectedValue
-	 */
-	public function testGetValueOrDefault($settings, $settingName, $defaultValue, $expectedValue) {
-		$packer = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($packer, 'valueOrDefault');
-		$method->setAccessible(TRUE);
-		$result = $method->invoke($packer, array('EM_CONF' => $settings), $settingName, $defaultValue);
-		$this->assertEquals($expectedValue, $result);
-	}
+        $packer->expects(self::once())->method('validateVersionNumber');
 
-	/**
-	 * @return array
-	 */
-	public function getSettingsAndValues() {
-		return array(
-			array(array('foo' => 'bar'), 'foo', 'baz', 'bar'),
-			array(array('foo' => 'bar'), 'foo2', 'baz', 'baz'),
-		);
-	}
+        $result = $packer->pack($directory, 'username', 'password', 'comment');
 
-	/**
-	 * @dataProvider getExtensionDataAndExpectedDependencyOutput
-	 * @param string $kindOfDependency
-	 * @param array $extensionData
-	 * @param array $expectedOutout
-	 * @param string $expectedException
-	 */
-	public function testCreateDependenciesArray($kindOfDependency, $extensionData, $expectedOutout, $expectedException) {
-		$uploader = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($uploader, 'createDependenciesArray');
-		$method->setAccessible(TRUE);
-		if (NULL !== $expectedException) {
-			$this->expectException($expectedException);
-		}
-		$output = $method->invoke($uploader, $extensionData, $kindOfDependency);
-		$this->assertEquals($expectedOutout, $output);
-	}
+        $expected = [
+            'accountData' => [
+                'username' => 'username',
+                'password' => 'password'
+            ],
+            'extensionData' => [
+                'extensionKey' => 'temp',
+                'version' => '1.2.3-invalid',
+                'metaData' => [
+                    'title' => 'Dummy title',
+                    'description' => 'Dummy description',
+                    'category' => 'misc',
+                    'state' => 'beta',
+                    'authorName' => 'Author Name',
+                    'authorEmail' => 'author@domain.com',
+                    'authorCompany' => '',
+                ],
+                'technicalData' => [
+                    'dependencies' => [
+                        [
+                            'kind' => 'depends',
+                            'extensionKey' => 'typo3',
+                            'versionRange' => '6.1.0-6.2.99',
+                        ],
+                        [
+                            'kind' => 'depends',
+                            'extensionKey' => 'cms',
+                            'versionRange' => '',
+                        ],
+                        [
+                            'kind' => 'suggests',
+                            'extensionKey' => 'news',
+                            'versionRange' => '',
+                        ]
+                    ],
+                    'loadOrder' => '',
+                    'uploadFolder' => false,
+                    'createDirs' => '',
+                    'shy' => 0,
+                    'modules' => '',
+                    'modifyTables' => '',
+                    'priority' => '',
+                    'clearCacheOnLoad' => false,
+                    'lockType' => '',
+                    'doNotLoadInFEe' => null,
+                    'docPath' => null,
+                ],
+                'infoData' => [
+                    'codeLines' => 41,
+                    'codeBytes' => 853,
+                    'codingGuidelinesCompliance' => '',
+                    'codingGuidelinesComplianceNotes' => '',
+                    'uploadComment' => 'comment',
+                    'techInfo' => 'All good, baby',
+                ],
+            ],
+            'filesData' => [
+                [
+                    'name' => 'ext_emconf.php',
+                    'size' => 853,
+                    'modificationTime' => self::$mtime,
+                    'isExecutable' => 0,
+                    'content' => self::$fixtureString,
+                    'contentMD5' => 'f87088992115285f0932e1f765548085',
+                ],
+            ],
+        ];
+        self::assertEquals($expected, $result);
+    }
 
-	/**
-	 * @return array
-	 */
-	public function getExtensionDataAndExpectedDependencyOutput() {
-		return array(
-			// correct usage and input:
-			array(
-				ExtensionUploadPacker::KIND_DEPENDENCY,
-				array(
-					'EM_CONF' => array(
-						'constraints' => array(
-							ExtensionUploadPacker::KIND_DEPENDENCY => array(
-								'foobar' => '0.0.0-1.0.0',
-								'foobar2' => '1.0.0-2.0.0',
-							)
-						)
-					)
-				),
-				array(
-					array('kind' => 'depends', 'extensionKey' => 'foobar', 'versionRange' => '0.0.0-1.0.0'),
-					array('kind' => 'depends', 'extensionKey' => 'foobar2', 'versionRange' => '1.0.0-2.0.0'),
-				),
-				NULL
-			),
-			// no deps: empty output, no error
-			array(
-				ExtensionUploadPacker::KIND_DEPENDENCY,
-				array('EM_CONF' => array()),
-				array(),
-				NULL
-			),
-			// deps setting not an array, empty output, no error
-			array(
-				ExtensionUploadPacker::KIND_DEPENDENCY,
-				array('EM_CONF' => array('constraints' => array(ExtensionUploadPacker::KIND_DEPENDENCY => 'iamastring'))),
-				array(),
-				NULL
-			),
-			// deps numerically indexed - error!
-			array(
-				ExtensionUploadPacker::KIND_DEPENDENCY,
-				array(
-					'EM_CONF' => array(
-						'constraints' => array(
-							ExtensionUploadPacker::KIND_DEPENDENCY => array(0 => array('0.0.0-1.0.0'))
-						)
-					)
-				),
-				array(),
-				'RuntimeException'
-			),
-		);
-	}
+    public function testReadExtensionConfigurationFileThrowsExceptionIfFileDoesNotExist()
+    {
+        $directory = vfsStream::url('doesnotexist');
+        $extensionKey = 'temp';
+        $packer = new ExtensionUploadPacker();
 
-	/**
-	 * @dataProvider getIsFilePermittedTestValues
-	 * @param \SplFileInfo $file
-	 * @param string $inPath
-	 * @param boolean $expectedPermitted
-	 */
-	public function testIsFilePermitted(\SplFileInfo $file, $inPath, $expectedPermitted) {
-		$instance = new ExtensionUploadPacker();
-		$method = new \ReflectionMethod($instance, 'isFilePermitted');
-		$method->setAccessible(TRUE);
-		$result = $method->invokeArgs($instance, array($file, $inPath));
-		$this->assertEquals($expectedPermitted, $result);
-	}
+        $method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
+        $method->setAccessible(true);
 
-	/**
-	 * @return array
-	 */
-	public function getIsFilePermittedTestValues() {
-		return array(
-			array(new \SplFileInfo('/path/file'), '/path', TRUE),
-			array(new \SplFileInfo('/path/.file'), '/path', FALSE),
-			array(new \SplFileInfo('/path/.htaccess'), '/path', TRUE),
-			array(new \SplFileInfo('/path/.htpasswd'), '/path', TRUE),
-			array(new \SplFileInfo('/.git/file'), '/.git', TRUE),
-			array(new \SplFileInfo('/.git/.dotfile'), '/.git', FALSE),
-			array(new \SplFileInfo('/.git/.htaccess'), '/.git', TRUE),
-			array(new \SplFileInfo('/.git/.htpasswd'), '/.git', TRUE),
-			array(new \SplFileInfo('/path/.git/file'), '/path', FALSE),
-		);
-	}
+        $this->expectException('RuntimeException');
 
+        $method->invoke($packer, $directory, $extensionKey);
+    }
+
+    public function testReadExtensionConfigurationFileThrowsExceptionIfVersionInFileIsInvalid()
+    {
+        $directory = vfsStream::url('ext_emconf.php');
+        $extensionKey = 'temp';
+        $packer = new ExtensionUploadPacker();
+
+        $method = new \ReflectionMethod($packer, 'readExtensionConfigurationFile');
+        $method->setAccessible(true);
+
+        $this->expectException('RuntimeException');
+
+        $method->invoke($packer, $directory, $extensionKey);
+    }
+
+    public function testPack()
+    {
+        $directory = vfsStream::url('temp');
+        $extensionKey = 'temp';
+
+        /** @var ExtensionUploadPacker|\PHPUnit_Framework_MockObject_MockObject $mock */
+        $mock = $this->getMockBuilder(ExtensionUploadPacker::class)
+            ->setMethods(['createFileDataArray', 'createSoapData', 'validateVersionNumber'])
+            ->getMock();
+
+        $method = new \ReflectionMethod($mock, 'readExtensionConfigurationFile');
+        $method->setAccessible(true);
+
+        $configuration = $method->invoke($mock, $directory, $extensionKey);
+
+        $mock->expects(self::once())->method('createFileDataArray')
+            ->with($directory)
+            ->will(self::returnValue(['foo' => 'bar']));
+
+        $mock->expects(self::once())
+            ->method('createSoapData')
+            ->with(
+                $extensionKey,
+                ['foo' => 'bar', 'EM_CONF' => $configuration],
+                'usernamefoo',
+                'passwordfoo',
+                'commentfoo'
+            )
+            ->will(self::returnValue('test'));
+        $result = $mock->pack($directory, 'usernamefoo', 'passwordfoo', 'commentfoo');
+        self::assertEquals('test', $result);
+    }
+
+    public function testCreateFileDataArray()
+    {
+        $directory = vfsStream::url('temp/');
+
+        $packer = new ExtensionUploadPacker();
+
+        $method = new \ReflectionMethod($packer, 'createFileDataArray');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($packer, $directory);
+
+        self::assertEquals(
+            [
+                'extKey' => 'temp',
+                'misc' => [
+                    'codelines' => 41,
+                    'codebytes' => 853
+                ],
+                'techInfo' => 'All good, baby',
+                'FILES' => [
+                    'ext_emconf.php' => [
+                        'name' => 'ext_emconf.php',
+                        'size' => 853,
+                        'mtime' => self::$mtime,
+                        'is_executable' => false,
+                        'content' => self::$fixtureString,
+                        'content_md5' => 'f87088992115285f0932e1f765548085',
+                        'codelines' => 41
+                    ]
+                ]
+            ],
+            $result
+        );
+    }
+
+    /**
+     * @dataProvider getSettingsAndValues
+     * @param array $settings
+     * @param string $settingName
+     * @param mixed $defaultValue
+     * @param mixed $expectedValue
+     */
+    public function testGetValueOrDefault($settings, $settingName, $defaultValue, $expectedValue)
+    {
+        $packer = new ExtensionUploadPacker();
+
+        $method = new \ReflectionMethod($packer, 'valueOrDefault');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($packer, ['EM_CONF' => $settings], $settingName, $defaultValue);
+
+        self::assertEquals($expectedValue, $result);
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettingsAndValues(): array
+    {
+        return [
+            [['foo' => 'bar'], 'foo', 'baz', 'bar'],
+            [['foo' => 'bar'], 'foo2', 'baz', 'baz'],
+        ];
+    }
+
+    /**
+     * @dataProvider getExtensionDataAndExpectedDependencyOutput
+     * @param string $kindOfDependency
+     * @param array $extensionData
+     * @param array $expectedOutout
+     * @param string $expectedException
+     */
+    public function testCreateDependenciesArray($kindOfDependency, $extensionData, $expectedOutout, $expectedException)
+    {
+        $uploader = new ExtensionUploadPacker();
+
+        $method = new \ReflectionMethod($uploader, 'createDependenciesArray');
+        $method->setAccessible(true);
+
+        if (null !== $expectedException) {
+            $this->expectException($expectedException);
+        }
+
+        $output = $method->invoke($uploader, $extensionData, $kindOfDependency);
+
+        self::assertEquals($expectedOutout, $output);
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtensionDataAndExpectedDependencyOutput(): array
+    {
+        return [
+            // correct usage and input:
+            [
+                ExtensionUploadPacker::KIND_DEPENDENCY,
+                [
+                    'EM_CONF' => [
+                        'constraints' => [
+                            ExtensionUploadPacker::KIND_DEPENDENCY => [
+                                'foobar' => '0.0.0-1.0.0',
+                                'foobar2' => '1.0.0-2.0.0',
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    ['kind' => 'depends', 'extensionKey' => 'foobar', 'versionRange' => '0.0.0-1.0.0'],
+                    ['kind' => 'depends', 'extensionKey' => 'foobar2', 'versionRange' => '1.0.0-2.0.0'],
+                ],
+                null
+            ],
+            // no deps: empty output, no error
+            [
+                ExtensionUploadPacker::KIND_DEPENDENCY,
+                ['EM_CONF' => []],
+                [],
+                null
+            ],
+            // deps setting not an array, empty output, no error
+            [
+                ExtensionUploadPacker::KIND_DEPENDENCY,
+                ['EM_CONF' => ['constraints' => [ExtensionUploadPacker::KIND_DEPENDENCY => 'iamastring']]],
+                [],
+                null
+            ],
+            // deps numerically indexed - error!
+            [
+                ExtensionUploadPacker::KIND_DEPENDENCY,
+                [
+                    'EM_CONF' => [
+                        'constraints' => [
+                            ExtensionUploadPacker::KIND_DEPENDENCY => [0 => ['0.0.0-1.0.0']]
+                        ]
+                    ]
+                ],
+                [],
+                'RuntimeException'
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider getIsFilePermittedTestValues
+     * @param \SplFileInfo $file
+     * @param string $inPath
+     * @param boolean $expectedPermitted
+     */
+    public function testIsFilePermitted(\SplFileInfo $file, $inPath, $expectedPermitted)
+    {
+        $instance = new ExtensionUploadPacker();
+
+        $method = new \ReflectionMethod($instance, 'isFilePermitted');
+        $method->setAccessible(true);
+
+        $result = $method->invokeArgs($instance, [$file, $inPath]);
+
+        self::assertEquals($expectedPermitted, $result);
+    }
+
+    /**
+     * @return array
+     */
+    public function getIsFilePermittedTestValues(): array
+    {
+        return [
+            [new \SplFileInfo('/path/file'), '/path', true],
+            [new \SplFileInfo('/path/.file'), '/path', false],
+            [new \SplFileInfo('/path/.htaccess'), '/path', true],
+            [new \SplFileInfo('/path/.htpasswd'), '/path', true],
+            [new \SplFileInfo('/.git/file'), '/.git', true],
+            [new \SplFileInfo('/.git/.dotfile'), '/.git', false],
+            [new \SplFileInfo('/.git/.htaccess'), '/.git', true],
+            [new \SplFileInfo('/.git/.htpasswd'), '/.git', true],
+            [new \SplFileInfo('/path/.git/file'), '/path', false],
+        ];
+    }
 }

@@ -1,41 +1,45 @@
 #!/usr/bin/env php
 <?php
 
-$paths = array(
-		realpath(__DIR__ . '/../vendor/autoload.php'),
-		realpath(__DIR__ . '/../../../../vendor/autoload.php'),
-);
+$paths = [
+    realpath(__DIR__ . '/../vendor/autoload.php'),
+    realpath(__DIR__ . '/../../../../vendor/autoload.php'),
+];
 foreach ($paths as $path) {
-		if (FALSE !== $path) {
-				require $path;
-		}
+    if (false !== $path) {
+        require $path;
+    }
 }
 
 if (5 !== count($argv)) {
-	die('Delete Version command requires exactly four arguments: extension key, version, username and password' . PHP_EOL);
+    die(
+        'Delete Version command requires exactly four arguments: extension key, version, username and password'
+        . PHP_EOL
+    );
 }
 
-list (, $extensionKey, $version, $username, $password) = $argv;
+[, $extensionKey, $version, $username, $password] = $argv;
 $deleter = new \NamelessCoder\TYPO3RepositoryClient\Deleter();
 
 try {
-	$result = $deleter->deleteExtensionVersion($extensionKey, $version, $username, $password);
+    $result = $deleter->deleteExtensionVersion($extensionKey, $version, $username, $password);
 } catch (\SoapFault $error) {
-	echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
-	exit(1);
+    echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
+    exit(1);
 } catch (\RuntimeException $error) {
-	echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
-	exit(1);
+    echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
+    exit(1);
 }
 
-if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION])) {
-	echo 'Succesfully removed TER extension version: ' . $result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION] . PHP_EOL;
+if (true === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION])) {
+    echo 'Succesfully removed TER extension version: '
+        . $result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_VERSION] . PHP_EOL;
 }
 
-if (TRUE === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES])) {
-	foreach ($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES] as $index => $message) {
-		echo 'Message #' . ($index + 1) . ': ' . $message . PHP_EOL;
-	}
+if (true === isset($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES])) {
+    foreach ($result[\NamelessCoder\TYPO3RepositoryClient\Connection::SOAP_RETURN_MESSAGES] as $index => $message) {
+        echo 'Message #' . ($index + 1) . ': ' . $message . PHP_EOL;
+    }
 }
 
 exit(0);
