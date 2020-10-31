@@ -7,6 +7,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
 use org\bovigo\vfs\vfsStreamWrapper;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\VarExporter\VarExporter;
 
 /**
  * Class VersionerTest
@@ -57,7 +58,7 @@ class VersionerTest extends TestCase
     public static function setUpBeforeClass()
     {
         self::$fixtureString =
-            '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . var_export(self::$fixture, true) . ';' . PHP_EOL;
+            '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . VarExporter::export(self::$fixture) . ';' . PHP_EOL;
         $emConf = new vfsStreamFile(Versioner::FILENAME_EXTENSION_CONFIGURATION);
         $emConf->setContent(self::$fixtureString);
 
@@ -352,7 +353,7 @@ class VersionerTest extends TestCase
         $fixture['version'] = $version;
         $fixture['state'] = $stability;
 
-        $expectedData = '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . var_export($fixture, true) . ';' . PHP_EOL;
+        $expectedData = '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . VarExporter::export($fixture) . ';' . PHP_EOL;
 
         $versioner = new Versioner();
 

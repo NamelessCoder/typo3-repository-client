@@ -1,6 +1,8 @@
 <?php
 namespace NamelessCoder\TYPO3RepositoryClient;
 
+use Symfony\Component\VarExporter\VarExporter;
+
 /**
  * Class Versioner
  */
@@ -128,7 +130,7 @@ class Versioner
         $configuration = $this->readExtensionConfigurationFile($filename);
         $configuration[self::PARAMETER_VERSION] = $version;
         $configuration[self::PARAMETER_STABILITY] = $stability;
-        $contents = '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . var_export($configuration, true) . ';' . PHP_EOL;
+        $contents = '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . VarExporter::export($configuration) . ';' . PHP_EOL;
         return file_put_contents($filename, $contents);
     }
 }
