@@ -34,9 +34,6 @@ $versioner = new \NamelessCoder\TYPO3RepositoryClient\Versioner();
 try {
     $result = $versioner->write($directory, $version, $stability);
     echo 'Version updated to ' . $version . '-' . $stability . PHP_EOL;
-} catch (\SoapFault $error) {
-    echo 'SOAP error: ' . $error->getMessage() . PHP_EOL;
-    exit(1);
 } catch (\RuntimeException $error) {
     echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
     exit(1);
