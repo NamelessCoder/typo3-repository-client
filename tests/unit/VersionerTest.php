@@ -54,7 +54,7 @@ class VersionerTest extends TestCase
      */
     protected static $fixtureString;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$fixtureString =
             '<' . '?php' . PHP_EOL . '$EM_CONF[$_EXTKEY] = ' . var_export(self::$fixture, true) . ';' . PHP_EOL;
@@ -336,7 +336,11 @@ class VersionerTest extends TestCase
         $result = $method->invokeArgs($versioner, [$vfsUrl, '1.2.3']);
 
         self::assertTrue($result);
-        self::assertNotContains('1.2.3', file_get_contents($vfsUrl));
+        if (method_exists(self::class, 'assertStringNotContainsString')) {
+            self::assertStringNotContainsString('1.2.3', file_get_contents($vfsUrl));
+        } else {
+            self::assertNotContains('1.2.3', file_get_contents($vfsUrl));
+        }
     }
 
     /**

@@ -5,11 +5,14 @@ sudo: false
 php:
   - "7"
   - "7.1"
+  - "7.2"
+  - "7.3"
+  - "7.4"
 
 before_install: composer self-update
 
 install: composer install
 
-script: ./bin/phpunit --coverage-clover=build/logs/clover.xml
+script: ./vendor/bin/phpunit --coverage-clover=build/logs/clover.xml
 
-after_script: ./bin/coveralls
+after_script: ./vendor/bin/coveralls

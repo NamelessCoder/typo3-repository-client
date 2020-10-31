@@ -17,6 +17,7 @@ class SoapDataCompilerTest extends TestCase
      */
     public function testCreateSoapData($username, $password, $data, $expectation)
     {
+        $this->markTestSkipped();
     }
 
     /**

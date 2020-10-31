@@ -61,7 +61,7 @@ class ExtensionUploadPackerTest extends TestCase
      */
     protected static $mtime;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$mtime = time();
         self::$fixtureString = '<' . '?php

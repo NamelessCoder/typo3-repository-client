@@ -18,8 +18,6 @@
     </testsuites>
     <filter>
         <whitelist>
-            <addUncoveredFilesFromWhitelist>true</addUncoveredFilesFromWhitelist>
-            <processUncoveredFilesFromWhitelist>true</processUncoveredFilesFromWhitelist>
             <directory>src</directory>
         </whitelist>
     </filter>

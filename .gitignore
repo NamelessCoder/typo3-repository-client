@@ -3,3 +3,4 @@ vendor
 bin/coveralls
 bin/phpunit
 build
+/.phpunit.result.cache

@@ -24,7 +24,7 @@
     "require-dev": {
         "mikey179/vfsstream": "~1.3.0",
         "satooshi/php-coveralls": "*",
-        "phpunit/phpunit": "^6.0"
+        "phpunit/phpunit": "^6.0|^8.0"
     },
     "extra": {
         "branch-alias": {
@@ -35,8 +35,5 @@
         "bin/setversion",
         "bin/upload",
         "bin/rmversion"
-    ],
-    "config": {
-        "bin-dir": "bin"
-    }
+    ]
 }
