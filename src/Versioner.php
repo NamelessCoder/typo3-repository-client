@@ -46,6 +46,8 @@ class Versioner
     {
         $extensionConfigurationFilename = $this->getExtensionConfigurationFilename($directory);
         $composerFilename = $this->getComposerFilename($directory);
+        // Remove v prefix for version tags
+        $version = str_replace('v', '', $version);
         if (false === $this->writeComposerFile($composerFilename, $version)) {
             throw new \RuntimeException('Could not write ' . $composerFilename . ' - please check permissions');
         }

@@ -32,7 +32,7 @@ if (empty($version)) {
 $versioner = new \NamelessCoder\TYPO3RepositoryClient\Versioner();
 
 try {
-    $result = $versioner->write($directory, $version, $stability);
+    $versioner->write($directory, $version, $stability);
     echo 'Version updated to ' . $version . '-' . $stability . PHP_EOL;
 } catch (\RuntimeException $error) {
     echo 'Runtime error: ' . $error->getMessage() . PHP_EOL;
