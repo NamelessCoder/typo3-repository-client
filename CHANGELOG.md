@@ -1,6 +1,19 @@
 Changelog - TYPO3 Extension Repository Client
 =============================================
 
+2.1.0 - 2021-09-02
+------------------
+
+- Fix mismatched quotes in error message
+- Add README note about ignored dot-files
+- Fix PHP 7.4 compatibility issue with array member access
+- Switched to PSR-2 code style
+- Fix composer warning about vfsStream dependency name casing
+- Add support for "v" prefixed tag names
+- Require the PHP SOAP extension
+- Improved composer autoloader detection
+- Removes a redundant exception catch
+
 2.0.0 - 2017-02-12
 ------------------
 
